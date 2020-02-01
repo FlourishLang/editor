@@ -78,11 +78,23 @@ representing several steps."
 
 (print-grids (take 3 (iterate step grid)) 5 5)</textarea>
   <script>
+    var content = localStorage.getItem("edtordata"); 
+    if (content) {
+       document.getElementById("demotext").value = content;
+    }
+    
+
+
     var editor = CodeMirror.fromTextArea(document.getElementById("demotext"), {
       lineNumbers: true,
       mode: 'text/x-clojure',
       matchBrackets: true
     });
+
+    CodeMirror.commands.save = function (editor) {
+      localStorage.setItem("edtordata",editor.getValue()); 
+    };
+
   </script>
 
 
