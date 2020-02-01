@@ -1,4 +1,6 @@
 import buble from 'rollup-plugin-buble';
+import serve from 'rollup-plugin-serve'
+import livereload from 'rollup-plugin-livereload'
 
 export default {
   input: "src/codemirror.js",
@@ -16,5 +18,5 @@ export default {
     file: "lib/codemirror.js",
     name: "CodeMirror"
   },
-  plugins: [ buble({namedFunctionExpressions: false}) ]
+  plugins: [ buble({namedFunctionExpressions: false}),serve(),livereload('lib') ]
 };
