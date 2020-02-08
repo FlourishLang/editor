@@ -5,9 +5,11 @@
 
 <link rel=stylesheet href="lib/codemirror.css">
 <link rel=stylesheet href="doc/docs.css">
+<link rel=stylesheet href="theme/material.css">
+
+
 <script src="lib/codemirror.js"></script>
 <script src="mode/xml/xml.js"></script>
-<script src="mode/javascript/javascript.js"></script>
 <script src="mode/flourish/flourish.js"></script>
 <script src="mode/css/css.js"></script>
 <script src="mode/htmlmixed/htmlmixed.js"></script>
@@ -88,7 +90,8 @@ representing several steps."
     var editor = CodeMirror.fromTextArea(document.getElementById("demotext"), {
       lineNumbers: true,
       mode: 'text/x-flourish',
-      matchBrackets: true
+      matchBrackets: true,
+      theme:"material"
     });
 
     CodeMirror.commands.save = function (editor) {
