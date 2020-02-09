@@ -10,116 +10,18 @@
       mod(CodeMirror);
   })(function(CodeMirror) {
     "use strict";
-    var GUTTER_ID = "CodeMirror-treeSitterParse-markers";
-  
-    function showTooltip(cm, e, content) {
-      var tt = document.createElement("div");
-      tt.className = "CodeMirror-treeSitterParse-tooltip cm-s-" + cm.options.theme;
-      tt.appendChild(content.cloneNode(true));
-      document.body.appendChild(tt);
-  
-      function position(e) {
-        if (!tt.parentNode) return CodeMirror.off(document, "mousemove", position);
-        tt.style.top = Math.max(0, e.clientY - tt.offsetHeight - 5) + "px";
-        tt.style.left = (e.clientX + 5) + "px";
-      }
-      CodeMirror.on(document, "mousemove", position);
-      position(e);
-      if (tt.style.opacity != null) tt.style.opacity = 1;
-      return tt;
-    }
-    function rm(elt) {
-      if (elt.parentNode) elt.parentNode.removeChild(elt);
-    }
-    function hideTooltip(tt) {
-      if (!tt.parentNode) return;
-      if (tt.style.opacity == null) rm(tt);
-      tt.style.opacity = 0;
-      setTimeout(function() { rm(tt); }, 600);
-    }
-  
-    function showTooltipFor(cm, e, content, node) {
-      var tooltip = showTooltip(cm, e, content);
-      function hide() {
-        CodeMirror.off(node, "mouseout", hide);
-        if (tooltip) { hideTooltip(tooltip); tooltip = null; }
-      }
-      var poll = setInterval(function() {
-        if (tooltip) for (var n = node;; n = n.parentNode) {
-          if (n && n.nodeType == 11) n = n.host;
-          if (n == document.body) return;
-          if (!n) { hide(); break; }
-        }
-        if (!tooltip) return clearInterval(poll);
-      }, 400);
-      CodeMirror.on(node, "mouseout", hide);
-    }
-  
+    
     function treeSitterParseState(cm, options, hasGutter) {
-      this.marked = [];
       this.options = options;
       this.timeout = null;
-      this.hasGutter = hasGutter;
-      this.onMouseOver = function(e) { onMouseOver(cm, e); };
       this.waitingFor = 0
     }
   
     function parseOptions(_cm, options) {
-      if (options instanceof Function) return {getAnnotations: options};
-      if (!options || options === true) options = {};
       return options;
     }
   
-    function clearMarks(cm) {
-      var state = cm.state.treeSitterParse;
-      if (state.hasGutter) cm.clearGutter(GUTTER_ID);
-      for (var i = 0; i < state.marked.length; ++i)
-        state.marked[i].clear();
-      state.marked.length = 0;
-    }
-  
-    function makeMarker(cm, labels, severity, multiple, tooltips) {
-      var marker = document.createElement("div"), inner = marker;
-      marker.className = "CodeMirror-treeSitterParse-marker-" + severity;
-      if (multiple) {
-        inner = marker.appendChild(document.createElement("div"));
-        inner.className = "CodeMirror-treeSitterParse-marker-multiple";
-      }
-  
-      if (tooltips != false) CodeMirror.on(inner, "mouseover", function(e) {
-        showTooltipFor(cm, e, labels, inner);
-      });
-  
-      return marker;
-    }
-  
-    function getMaxSeverity(a, b) {
-      if (a == "error") return a;
-      else return b;
-    }
-  
-    function groupByLine(annotations) {
-      var lines = [];
-      for (var i = 0; i < annotations.length; ++i) {
-        var ann = annotations[i], line = ann.from.line;
-        (lines[line] || (lines[line] = [])).push(ann);
-      }
-      return lines;
-    }
-  
-    function annotationTooltip(ann) {
-      var severity = ann.severity;
-      if (!severity) severity = "error";
-      var tip = document.createElement("div");
-      tip.className = "CodeMirror-treeSitterParse-message-" + severity;
-      if (typeof ann.messageHTML != 'undefined') {
-        tip.innerHTML = ann.messageHTML;
-      } else {
-        tip.appendChild(document.createTextNode(ann.message));
-      }
-      return tip;
-    }
-  
+    
     function treeSitterParseAsync(cm, getAnnotations, passOptions) {
       var state = cm.state.treeSitterParse
       var id = ++state.waitingFor
@@ -132,15 +34,15 @@
         cm.off("change", abort)
         if (state.waitingFor != id) return
         if (arg2 && annotations instanceof CodeMirror) annotations = arg2
-        cm.operation(function() {updatetreeSitterParseing(cm, annotations)})
+        cm.operation(function() {updateTreeSitterParsing(cm, annotations)})
       }, passOptions, cm);
     }
   
-    function starttreeSitterParseing(cm) {
+    function startTreeSitterParsing(cm) {
       var state = cm.state.treeSitterParse, options = state.options;
       /*
        * Passing rules in `options` property prevents JSHint (and other treeSitterParseers) from complaining
-       * about unrecognized rules like `onUpdatetreeSitterParseing`, `delay`, `treeSitterParseOnChange`, etc.
+       * about unrecognized rules like `onupdateTreeSitterParsing`, `delay`, `treeSitterParseOnChange`, etc.
        */
       var passOptions = options.options || options;
       var getAnnotations = options.getAnnotations || cm.getHelper(CodeMirror.Pos(0, 0), "treeSitterParse");
@@ -151,13 +53,13 @@
         var annotations = getAnnotations(cm.getValue(), passOptions, cm);
         if (!annotations) return;
         if (annotations.then) annotations.then(function(issues) {
-          cm.operation(function() {updatetreeSitterParseing(cm, issues)})
+          cm.operation(function() {updateTreeSitterParsing(cm, issues)})
         });
-        else cm.operation(function() {updatetreeSitterParseing(cm, annotations)})
+        else cm.operation(function() {updateTreeSitterParsing(cm, annotations)})
       }
     }
   
-    function updatetreeSitterParseing(cm, annotationsNotSorted) {
+    function updateTreeSitterParsing(cm, annotationsNotSorted) {
       clearMarks(cm);
       var state = cm.state.treeSitterParse, options = state.options;
   
@@ -185,69 +87,39 @@
           }));
         }
   
-        if (state.hasGutter)
-          cm.setGutterMarker(line, GUTTER_ID, makeMarker(cm, tipLabel, maxSeverity, anns.length > 1,
-                                                         state.options.tooltips));
       }
-      if (options.onUpdatetreeSitterParseing) options.onUpdatetreeSitterParseing(annotationsNotSorted, annotations, cm);
+      if (options.onupdateTreeSitterParsing) options.onupdateTreeSitterParsing(annotationsNotSorted, annotations, cm);
     }
   
     function onChange(cm) {
       var state = cm.state.treeSitterParse;
       if (!state) return;
       clearTimeout(state.timeout);
-      state.timeout = setTimeout(function(){starttreeSitterParseing(cm);}, state.options.delay || 500);
+      state.timeout = setTimeout(function(){startTreeSitterParsing(cm);}, state.options.delay || 500);
     }
   
-    function popupTooltips(cm, annotations, e) {
-      var target = e.target || e.srcElement;
-      var tooltip = document.createDocumentFragment();
-      for (var i = 0; i < annotations.length; i++) {
-        var ann = annotations[i];
-        tooltip.appendChild(annotationTooltip(ann));
-      }
-      showTooltipFor(cm, e, tooltip, target);
-    }
   
-    function onMouseOver(cm, e) {
-      var target = e.target || e.srcElement;
-      if (!/\bCodeMirror-treeSitterParse-mark-/.test(target.className)) return;
-      var box = target.getBoundingClientRect(), x = (box.left + box.right) / 2, y = (box.top + box.bottom) / 2;
-      var spans = cm.findMarksAt(cm.coordsChar({left: x, top: y}, "client"));
-  
-      var annotations = [];
-      for (var i = 0; i < spans.length; ++i) {
-        var ann = spans[i].__annotation;
-        if (ann) annotations.push(ann);
-      }
-      if (annotations.length) popupTooltips(cm, annotations, e);
-    }
   
     CodeMirror.defineOption("treeSitter", false, function(cm, val, old) {
       if (old && old != CodeMirror.Init) {
         clearMarks(cm);
         if (cm.state.treeSitterParse.options.treeSitterParseOnChange !== false)
           cm.off("change", onChange);
-        CodeMirror.off(cm.getWrapperElement(), "mouseover", cm.state.treeSitterParse.onMouseOver);
         clearTimeout(cm.state.treeSitterParse.timeout);
         delete cm.state.treeSitterParse;
       }
   
       if (val) {
-        var gutters = cm.getOption("gutters"), hastreeSitterParseGutter = false;
-        for (var i = 0; i < gutters.length; ++i) if (gutters[i] == GUTTER_ID) hastreeSitterParseGutter = true;
         var state = cm.state.treeSitterParse = new treeSitterParseState(cm, parseOptions(cm, val), hastreeSitterParseGutter);
         if (state.options.treeSitterParseOnChange !== false)
           cm.on("change", onChange);
-        if (state.options.tooltips != false && state.options.tooltips != "gutter")
-          CodeMirror.on(cm.getWrapperElement(), "mouseover", state.onMouseOver);
   
-        starttreeSitterParseing(cm);
+        startTreeSitterParsing(cm);
       }
     });
   
     CodeMirror.defineExtension("performtreeSitterParse", function() {
-      if (this.state.treeSitterParse) starttreeSitterParseing(this);
+      if (this.state.treeSitterParse) startTreeSitterParsing(this);
     });
   });
   
