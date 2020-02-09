@@ -45,7 +45,7 @@
        * about unrecognized rules like `onupdateTreeSitterParsing`, `delay`, `treeSitterParseOnChange`, etc.
        */
       var passOptions = options.options || options;
-      var getAnnotations = options.getAnnotations || cm.getHelper(CodeMirror.Pos(0, 0), "treeSitterParse");
+      var getAnnotations = options.getAnnotations || cm.getHelper(CodeMirror.Pos(0, 0), "treeSitterParserLang");
       if (!getAnnotations) return;
       if (options.async || getAnnotations.async) {
         treeSitterParseAsync(cm, getAnnotations, passOptions)
@@ -110,7 +110,7 @@
       }
   
       if (val) {
-        var state = cm.state.treeSitterParse = new treeSitterParseState(cm, parseOptions(cm, val), hastreeSitterParseGutter);
+        var state = cm.state.treeSitterParse = new treeSitterParseState(cm, parseOptions(cm, val), false);
         if (state.options.treeSitterParseOnChange !== false)
           cm.on("change", onChange);
   
@@ -118,7 +118,7 @@
       }
     });
   
-    CodeMirror.defineExtension("performtreeSitterParse", function() {
+    CodeMirror.defineExtension("performTreeSitterParse", function() {
       if (this.state.treeSitterParse) startTreeSitterParsing(this);
     });
   });
