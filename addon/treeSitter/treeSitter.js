@@ -40,26 +40,25 @@
   
     function startTreeSitterParsing(cm) {
       var state = cm.state.treeSitterParse, options = state.options;
-      /*
-       * Passing rules in `options` property prevents JSHint (and other treeSitterParseers) from complaining
-       * about unrecognized rules like `onupdateTreeSitterParsing`, `delay`, `treeSitterParseOnChange`, etc.
-       */
-      var passOptions = options.options || options;
-      var getAnnotations = options.getAnnotations || cm.getHelper(CodeMirror.Pos(0, 0), "treeSitterParserLang");
-      if (!getAnnotations) return;
-      if (options.async || getAnnotations.async) {
-        treeSitterParseAsync(cm, getAnnotations, passOptions)
-      } else {
-        var annotations = getAnnotations(cm.getValue(), passOptions, cm);
-        if (!annotations) return;
-        if (annotations.then) annotations.then(function(issues) {
-          cm.operation(function() {updateTreeSitterParsing(cm, issues)})
-        });
-        else cm.operation(function() {updateTreeSitterParsing(cm, annotations)})
+   
+      var treeSitterParserLang = options.treeSitterParserLang || cm.getHelper(CodeMirror.Pos(0, 0), "treeSitterParserLang");
+      if (!treeSitterParserLang) return;
+      if (options.async || treeSitterParserLang.async) {
+        treeSitterParseAsync(cm, treeSitterParserLang, passOptions)
+      } else 
+      {
+        // var annotations = treeSitterParserLang(cm.getValue(), null, cm);
+        // if (!annotations) return;
+        // if (annotations.then) annotations.then(function(issues) {
+        //   cm.operation(function() {updateTreeSitterParsing(cm, issues)})
+        // });
+        // else
+         cm.operation(function() {updateTreeSitterParsing(cm, null)})
       }
     }
   
     function updateTreeSitterParsing(cm, annotationsNotSorted) {
+      debugger;
       clearMarks(cm);
       var state = cm.state.treeSitterParse, options = state.options;
   
@@ -106,6 +105,7 @@
         if (cm.state.treeSitterParse.options.treeSitterParseOnChange !== false)
           cm.off("change", onChange);
         clearTimeout(cm.state.treeSitterParse.timeout);
+        
         delete cm.state.treeSitterParse;
       }
   
@@ -113,6 +113,8 @@
         var state = cm.state.treeSitterParse = new treeSitterParseState(cm, parseOptions(cm, val), false);
         if (state.options.treeSitterParseOnChange !== false)
           cm.on("change", onChange);
+          CodeMirror.defineDocExtension("treeSitterTree", {})
+
   
         startTreeSitterParsing(cm);
       }
