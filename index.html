@@ -9,11 +9,10 @@
 
 
 <script src="lib/codemirror.js"></script>
-<script src="mode/xml/xml.js"></script>
 <script src="mode/flourish/flourish.js"></script>
 <script src="mode/css/css.js"></script>
-<script src="mode/htmlmixed/htmlmixed.js"></script>
 <script src="addon/edit/matchbrackets.js"></script>
+<script src="addon/treeSitter/treeSitter.js"></script>
 
 
 <style>
@@ -91,7 +90,9 @@ representing several steps."
       lineNumbers: true,
       mode: 'text/x-flourish',
       matchBrackets: true,
-      theme:"material"
+      theme:"material",
+      treeSitter: true
+
     });
 
     CodeMirror.commands.save = function (editor) {
