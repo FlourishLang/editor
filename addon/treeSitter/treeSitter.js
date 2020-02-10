@@ -10,6 +10,12 @@
       mod(CodeMirror);
   })(function(CodeMirror) {
     "use strict";
+    if (!window.io) {
+      console.error("Unable to connect socket, failing");
+      return;
+    }
+
+
     
     function treeSitterParseState(cm, options, hasGutter) {
       this.options = options;
@@ -58,8 +64,6 @@
     }
   
     function updateTreeSitterParsing(cm, annotationsNotSorted) {
-      debugger;
-      clearMarks(cm);
       var state = cm.state.treeSitterParse, options = state.options;
   
       var annotations = groupByLine(annotationsNotSorted);
