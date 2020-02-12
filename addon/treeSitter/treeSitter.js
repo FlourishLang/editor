@@ -11,7 +11,7 @@
   })(function(CodeMirror) {
     "use strict";
     if (!window.io) {
-      console.error("Unable to connect socket, failing");
+      console.error("Unable to get socket.io, failing");
       return;
     }
 
@@ -46,21 +46,26 @@
   
     function startTreeSitterParsing(cm) {
       var state = cm.state.treeSitterParse, options = state.options;
-   
-      var treeSitterParserLang = options.treeSitterParserLang || cm.getHelper(CodeMirror.Pos(0, 0), "treeSitterParserLang");
-      if (!treeSitterParserLang) return;
-      if (options.async || treeSitterParserLang.async) {
-        treeSitterParseAsync(cm, treeSitterParserLang, passOptions)
-      } else 
-      {
-        // var annotations = treeSitterParserLang(cm.getValue(), null, cm);
-        // if (!annotations) return;
-        // if (annotations.then) annotations.then(function(issues) {
-        //   cm.operation(function() {updateTreeSitterParsing(cm, issues)})
-        // });
-        // else
-         cm.operation(function() {updateTreeSitterParsing(cm, null)})
-      }
+      var socket = io('http://localhost:3000');
+      socket.on('connect', function(){
+        socket.emit('parse',cm.getValue())
+        socket.on('parseComplete', function(treeInfo){
+          debugger;
+          cm.getDoc().treeSitterTree = treeInfo;
+
+        });
+
+      });
+      
+          // {
+      //   // var annotations = treeSitterParserLang(cm.getValue(), null, cm);
+      //   // if (!annotations) return;
+      //   // if (annotations.then) annotations.then(function(issues) {
+      //   //   cm.operation(function() {updateTreeSitterParsing(cm, issues)})
+      //   // });
+      //   // else
+      //    cm.operation(function() {updateTreeSitterParsing(cm, null)})
+      // }
     }
   
     function updateTreeSitterParsing(cm, annotationsNotSorted) {
