@@ -11,20 +11,44 @@
 })(function (CodeMirror) {
   "use strict";
 
-  
-  class TreeHiliter {
 
-    constructor(tree,start){
-      this.cursorPos = 0;
-      this.tree=this.tree;
-      this.cursorNode=null;
-      resetCursorPos(start);
+
+
+
+  function getTreeToken(tree, startPos, endPos) {
+
+    function comparePos(pos1, pos2) {
+      if (pos1.column != pos2.column)
+        return pos1.column - pos2.column;
+
+      return pos1.row - pos2.row;
+
     }
 
-    resetCursorPos(start){
+    function walk(tree) {
+      if (comparePos(tree.endPosition, startPos) < 0) {
+        return undefined;
+      }
 
+      if (tree.type == "ERROR")
+        return { type: "error", end: tree.endPosition };
+
+      if (tree.children && tree.children.length) {
+        for (let index = 0; index < tree.children.length; index++) {
+          const element = tree.children[index];
+          let result = walk(element);
+          if (result != undefined) {
+            return result;
+          }
+        }
+
+      }
     }
-    
+
+
+    return walk(tree);
+
+
   }
 
 
@@ -36,11 +60,31 @@
       token: function (stream, state) {
 
         if (this.treeSitterTree == null) {
-          while (stream.eat(/./));
+          stream.next();
           return null;
         }
         else {
-          debugger;
+          // while (stream.eat(/./));
+          //console.log(this.treeSitterTree);
+          let len = stream.string.length
+          let res = getTreeToken(this.treeSitterTree, { column: stream.pos, row: stream.lineOracle.line }, { column: stream.string.length, row: stream.lineOracle.line })
+          if (res !== undefined) {
+            if (stream.lineOracle.line == res.end.row) {
+              while ( stream.pos <= res.end.column )
+                {
+                  stream.next();
+                  if(stream.eol())
+                    break;
+                }
+            } else {
+              stream.skipToEnd();
+            }
+
+            return res.type;
+          }
+          stream.next();
+          return null;
+
         }
 
 

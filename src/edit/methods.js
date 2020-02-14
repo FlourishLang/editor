@@ -420,6 +420,20 @@ export default function(CodeMirror) {
       signal(this, "refresh", this)
     }),
 
+    refreshPart: methodOp(function (from, to) {
+      if (from == null) from = this.doc.first
+      if (to == null) to = this.doc.first + this.doc.size
+
+      this.doc.iter(from, to, line => {
+          line.styles =null;
+      })
+
+      for (let lineNo = from; lineNo < to; lineNo++) {
+        regLineChange(this, lineNo, "text");
+      }
+
+    }),
+
     swapDoc: methodOp(function(doc) {
       let old = this.doc
       old.cm = null
