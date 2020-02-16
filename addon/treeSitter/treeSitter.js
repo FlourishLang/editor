@@ -52,8 +52,13 @@
         socket.on('parseComplete', function(treeInfo){
           console.log("parsecomplete",treeInfo);
           if(cm.getMode().hasOwnProperty("treeSitterTree"))
+          cm.operation(function () {
             cm.getMode().treeSitterTree = treeInfo;
-          socket.disconnect();
+            cm.state.modeGen ++;
+             cm.curOp.forceUpdate = true;
+          })
+            
+          socket.disconnect();  
         });
 
       });
@@ -124,9 +129,9 @@
         if (state.options.treeSitterParseOnChange !== false)
           cm.on("change", onChange);
           CodeMirror.defineDocExtension("treeSitterTree", {})
-
-  
-        startTreeSitterParsing(cm);
+          CodeMirror.defineInitHook(function(){
+            startTreeSitterParsing(cm);    
+          })
       }
     });
   

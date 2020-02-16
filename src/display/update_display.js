@@ -135,7 +135,7 @@ export function updateDisplayIfNeeded(cm, update) {
   // update, since that speeds up the operations on most browsers.
   let selSnapshot = selectionSnapshot(cm)
   if (toUpdate > 4) display.lineDiv.style.display = "none"
-  patchDisplay(cm, display.updateLineNumbers, update.dims)
+  patchDisplay(cm, display.updateLineNumbers, update.dims, update.force)
   if (toUpdate > 4) display.lineDiv.style.display = ""
   display.renderedView = display.view
   // There might have been a widget with a focused element that got
@@ -206,7 +206,7 @@ export function updateDisplaySimple(cm, viewport) {
 // nodes for lines that are no longer in view, and creating the ones
 // that are not there yet, and updating the ones that are out of
 // date.
-function patchDisplay(cm, updateNumbersFrom, dims) {
+function patchDisplay(cm, updateNumbersFrom, dims,force) {
   let display = cm.display, lineNumbers = cm.options.lineNumbers
   let container = display.lineDiv, cur = container.firstChild
 
@@ -233,6 +233,8 @@ function patchDisplay(cm, updateNumbersFrom, dims) {
       while (cur != lineView.node) cur = rm(cur)
       let updateNumber = lineNumbers && updateNumbersFrom != null &&
         updateNumbersFrom <= lineN && lineView.lineNumber
+
+      if (force) lineView.changes = ["text"];
       if (lineView.changes) {
         if (indexOf(lineView.changes, "gutter") > -1) updateNumber = false
         updateLineForChanges(cm, lineView, lineN, dims)
