@@ -9,10 +9,10 @@ const io = require('socket.io')(server);
 io.on('connection', socket => {
     socket.on('parse', sourceCode => {
         const tree = parser.parse(sourceCode);
-
+        debugger;
 
         function walk(node) {
-            let info = { startPosition: node.startPosition, type: node.type, endIndex: node.endPosition }
+            let info = { startPosition: node.startPosition, type: node.type, endPosition: node.endPosition }
             if (node.childCount) {
                 info.children = [];
                 let child = node.firstChild;

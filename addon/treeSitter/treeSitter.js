@@ -50,6 +50,7 @@
       socket.on('connect', function(){
         socket.emit('parse',cm.getValue())
         socket.on('parseComplete', function(treeInfo){
+          console.log("parsecomplete",treeInfo);
           if(cm.getMode().hasOwnProperty("treeSitterTree"))
             cm.getMode().treeSitterTree = treeInfo;
           socket.disconnect();
