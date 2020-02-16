@@ -70,8 +70,12 @@
           let res = getTreeToken(this.treeSitterTree, { column: stream.pos, row: stream.lineOracle.line }, { column: stream.string.length, row: stream.lineOracle.line })
           if (res !== undefined) {
             if (stream.lineOracle.line == res.end.row) {
-              while (stream.pos < res.end.column)
-                stream.next();
+              while ( stream.pos <= res.end.column )
+                {
+                  stream.next();
+                  if(stream.eol())
+                    break;
+                }
             } else {
               stream.skipToEnd();
             }
