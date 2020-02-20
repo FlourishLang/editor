@@ -18,20 +18,47 @@
   function getTreeToken(tree, startPos, endPos) {
 
     function comparePos(pos1, pos2) {
-      if (pos1.column != pos2.column)
-        return pos1.column - pos2.column;
+      if (pos1.row != pos2.row)
+        return pos1.row - pos2.row;
 
-      return pos1.row - pos2.row;
+      return pos1.column - pos2.column;
 
     }
 
+
     function walk(tree) {
-      if (comparePos(tree.endPosition, startPos) < 0) {
+      if (comparePos(tree.endPosition, startPos) <= 0) {
         return undefined;
       }
 
+      if (tree.type.slice(0, "open".length) == "open")
+        return { type: "bracket", end: tree.endPosition };
+      if (tree.type.slice(0, "close".length) == "close")
+        return { type: "bracket", end: tree.endPosition };
+
+      if (tree.type.slice(0, "quoted".length) == "quoted")
+        return { type: "variable-2", end: tree.endPosition };
+      if (tree.type.slice(0, "unquoted".length) == "unquoted")
+        return { type: "variable-2", end: tree.endPosition };
+      if (tree.type.slice(0, "quasiquoted".length) == "quasiquoted")
+        return { type: "variable-2", end: tree.endPosition };
+
+      if (tree.type.slice(0, "spliced".length) == "spliced")
+        return { type: "variable-2", end: tree.endPosition };
+
+
+
+      if (tree.type == "symbol")
+        return { type: "keyword", end: tree.endPosition };
+      if (tree.type == "string")
+        return { type: "string", end: tree.endPosition };
+
+
+
       if (tree.type == "ERROR")
         return { type: "error", end: tree.endPosition };
+
+
 
       if (tree.children && tree.children.length) {
         for (let index = 0; index < tree.children.length; index++) {
@@ -70,12 +97,11 @@
           let res = getTreeToken(this.treeSitterTree, { column: stream.pos, row: stream.lineOracle.line }, { column: stream.string.length, row: stream.lineOracle.line })
           if (res !== undefined) {
             if (stream.lineOracle.line == res.end.row) {
-              while ( stream.pos <= res.end.column )
-                {
-                  stream.next();
-                  if(stream.eol())
-                    break;
-                }
+              while (stream.pos < res.end.column) {
+                stream.next();
+                if (stream.eol())
+                  break;
+              }
             } else {
               stream.skipToEnd();
             }
