@@ -14,6 +14,8 @@
 <script src="addon/edit/matchbrackets.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
 <script src="addon/treeSitter/treeSitter.js"></script>
+<script src="addon/selection/active-line.js"></script>
+
 
 
 <style>
@@ -22,6 +24,8 @@
   .CodeMirror pre { padding-left: 7px; line-height: 1.25; }
   .banner { background: #ffc; padding: 6px; border-bottom: 2px solid silver;  }
   .banner div { margin: 0 auto; max-width: 700px; text-align: center; }
+  .styled-background { background-color: #ff7; }
+
 </style>
 
   <form style="position: relative; margin-top: .5em;"><textarea id=demotext>
@@ -91,10 +95,12 @@ representing several steps."
       lineNumbers: true,
       mode: 'text/x-flourish',
       matchBrackets: true,
-      theme:"material",
-      treeSitter: true
+      // theme:"material",
+      treeSitter: true,
+      styleActiveLine: true
 
     });
+    editor.markText({line: 0, ch: 5}, {line: 0, ch: 10}, {className: "styled-background",clearOnEnter:true});
 
     CodeMirror.commands.save = function (editor) {
       localStorage.setItem("edtordata",editor.getValue()); 
