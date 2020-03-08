@@ -35,15 +35,15 @@
 
       if (tree.type == "cmd")
         return { type: "keyword", end: tree.endPosition };
-      if (tree.type == "argument" && tree.children.length == 1 && tree.children[0].type == "identifier")
-        { 
-          return { type: "variable", end: tree.endPosition };
-        }
-        if (tree.type == "(" || tree.type == ")")
-        { 
-          return { type: "bracket", end: tree.endPosition };
-        }
-
+      if (tree.type == "argument" && tree.children.length == 1 && tree.children[0].type == "identifier") {
+        return { type: "variable", end: tree.endPosition };
+      }
+      if (tree.type == "(" || tree.type == ")") {
+        return { type: "bracket", end: tree.endPosition };
+      }
+      if (tree.type == "string") {
+        return { type: "string", end: tree.endPosition };
+      }
 
       if (tree.type == "number")
         return { type: "number", end: tree.endPosition };
