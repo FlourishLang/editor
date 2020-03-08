@@ -1,8 +1,8 @@
 const Parser = require('tree-sitter');
-const Lisp = require('tree-sitter-lisp');
+const Flourish = require('tree-sitter-flourish');
 
 const parser = new Parser();
-parser.setLanguage(Lisp);
+parser.setLanguage(Flourish);
 
 const server = require('http').createServer();
 const io = require('socket.io')(server);

@@ -31,21 +31,22 @@
         return undefined;
       }
 
-      if (tree.type.slice(0, "open".length) == "open")
-        return { type: "bracket", end: tree.endPosition };
-      if (tree.type.slice(0, "close".length) == "close")
-        return { type: "bracket", end: tree.endPosition };
 
-      if (tree.type.slice(0, "quoted".length) == "quoted")
-        return { type: "variable-2", end: tree.endPosition };
-      if (tree.type.slice(0, "unquoted".length) == "unquoted")
-        return { type: "variable-2", end: tree.endPosition };
-      if (tree.type.slice(0, "quasiquoted".length) == "quasiquoted")
-        return { type: "variable-2", end: tree.endPosition };
 
-      if (tree.type.slice(0, "spliced".length) == "spliced")
-        return { type: "variable-2", end: tree.endPosition };
+      if (tree.type == "cmd")
+        return { type: "keyword", end: tree.endPosition };
+      if (tree.type == "argument" && tree.children.length == 1 && tree.children[0].type == "identifier")
+        { 
+          return { type: "variable", end: tree.endPosition };
+        }
+        if (tree.type == "(" || tree.type == ")")
+        { 
+          return { type: "bracket", end: tree.endPosition };
+        }
 
+
+      if (tree.type == "number")
+        return { type: "number", end: tree.endPosition };
 
 
       if (tree.type == "symbol")

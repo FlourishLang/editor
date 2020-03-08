@@ -11,6 +11,6 @@
   "dependencies": {
     "socket.io": "^2.3.0",
     "tree-sitter": "^0.16.0",
-    "tree-sitter-flourish": "/Volumes/Development/Projects/tree-sitter-flourish"
+    "tree-sitter-flourish": "file:../../../../../../../../Volumes/Development/Projects/tree-sitter-flourish"
   }
 }
