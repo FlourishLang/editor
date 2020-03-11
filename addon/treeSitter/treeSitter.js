@@ -28,7 +28,18 @@
   }
 
 
+  function calculateFullRange(changed, edited) {
+    let rangeArray = changed.slice();
+    rangeArray.push(edited);
+    return rangeArray.reduce((accumelater, current) => {
+      return {
+        startIndex: Math.min(accumelater.startIndex, current.startIndex),
+        endIndex: Math.max(accumelater.endIndex, current.endIndex),
+      }
+    })
 
+
+  }
 
   function startTreeSitterParsing(cm) {
     var state = cm.state.treeSitterParse, options = state.options;
@@ -41,7 +52,16 @@
           cm.getMode().treeSitterTree = treeInfo;
         cm.operation(function () {
           cm.getMode().treeSitterTree = treeInfo;
-          cm.refreshPart()
+          if (treeInfo.changes) {
+
+            let finalrange = calculateFullRange(treeInfo.changes.changedRange, treeInfo.changes.editedRange);
+            let finalStartPos = cm.doc.posFromIndex(finalrange.startIndex);
+            let finalEndPos = cm.doc.posFromIndex(finalrange.endIndex);
+            cm.refreshPart(finalStartPos.line, finalEndPos.line+1);
+          } else {
+            cm.refreshPart();
+
+          }
         })
 
 
@@ -52,10 +72,36 @@
 
   }
 
-  function updateTreeSitterParsing(cm, newtext, startIndex, oldEndIndex, newEndIndex, from, to, newEndPosition) {
+  function updateTreeSitterParsing(cm, newtext, posInfo) {
     var state = cm.state.treeSitterParse, options = state.options;
-    state.socket.emit('parseIncremental', { newtext, startIndex, oldEndIndex, newEndIndex, from, to, newEndPosition });
+    state.socket.emit('parseIncremental', { newtext, posInfo });
 
+  }
+
+  function treeEditForEditorChange(change, doc) {
+    const oldLineCount = change.removed.length;
+    const newLineCount = change.text.length;
+    const lastLineLength = change.text[newLineCount - 1].length;
+
+    const startPosition = { row: change.from.line, column: change.from.ch };
+    const oldEndPosition = { row: change.to.line, column: change.to.ch };
+    const newEndPosition = {
+      row: startPosition.row + newLineCount - 1,
+      column: newLineCount === 1
+        ? startPosition.column + lastLineLength
+        : lastLineLength
+    };
+
+    const startIndex = doc.indexFromPos(change.from);
+    let newEndIndex = startIndex + newLineCount - 1;
+    let oldEndIndex = startIndex + oldLineCount - 1;
+    for (let i = 0; i < newLineCount; i++) newEndIndex += change.text[i].length;
+    for (let i = 0; i < oldLineCount; i++) oldEndIndex += change.removed[i].length;
+
+    return {
+      startIndex, oldEndIndex, newEndIndex,
+      startPosition, oldEndPosition, newEndPosition
+    };
   }
 
   function onChange(cm, change) {
@@ -65,13 +111,13 @@
     if (cm.getMode().hasOwnProperty("treeSitterTree") && cm.getMode().treeSitterTree) {
 
 
-      let startIndex = cm.doc.indexFromPos(change.from);
-      let oldEndIndex = startIndex + change.removed.join('\n').length;
-      let newEndIndex = startIndex + change.text.join('\n').length;
-      let newEndPosition = cm.doc.posFromIndex(newEndIndex)
+      // let startIndex = cm.doc.indexFromPos(change.from);
+      // let oldEndIndex = startIndex + change.removed.join('\n').length;
+      // let newEndIndex = startIndex + change.text.join('\n').length;
+      // let newEndPosition = cm.doc.posFromIndex(newEndIndex)
 
       let newtext = cm.doc.getValue();
-      updateTreeSitterParsing(cm, newtext, startIndex, oldEndIndex, newEndIndex, change.from, change.to, newEndPosition);
+      updateTreeSitterParsing(cm, newtext, treeEditForEditorChange(change, cm.doc));
 
 
     }

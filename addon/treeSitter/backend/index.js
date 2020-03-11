@@ -31,19 +31,14 @@ io.on('connection', socket => {
 
     socket.on('parseIncremental', data => {
         const newSourceCode = data.newtext;
+        tree.edit(data.posInfo);
 
-        tree.edit({
-            startIndex: data.startIndex,
-            oldEndIndex: data.oldEndIndex,
-            newEndIndex: data.newEndIndex,
-            startPosition: { row: data.from.line, column: data.from.ch },
-            oldEndPosition: { row: data.to.line, column: data.to.ch },
-            newEndPosition: { row: data.newEndPosition.line, column: data.newEndPosition.ch },
-        });
 
         let newtree = parser.parse(newSourceCode, tree);
 
-        let changes = newtree.getChangedRanges(tree);
+        let changedRange = tree.getChangedRanges(newtree);
+        let editedRange = tree.getEditedRange()
+
         tree = newtree;
 
         function walk(node) {
@@ -60,7 +55,7 @@ io.on('connection', socket => {
         }
 
         let info = walk(tree.rootNode);
-        info.changes = changes;
+        info.changes = {changedRange,editedRange};
         socket.emit('parseComplete', info);
 
     });
