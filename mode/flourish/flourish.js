@@ -12,8 +12,10 @@
   "use strict";
 
 
-
-
+  /* This is the quick and dirty way of adding treesitter support codemirror. 
+  The goal for now is only for get the system working; no efforts for optimisation being 
+  done here.
+  */
 
   function getTreeToken(tree, startPos, endPos) {
 
