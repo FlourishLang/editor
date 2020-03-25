@@ -16,7 +16,7 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -w -c",
-    "start": "concurrently --kill-others \"node --inspect addon/treeSitter/backend/index.js\" \"npm run watch\" ",
+    "start": "concurrently --kill-others \"node --inspect flourish/treeSitter/backend/index.js\" \"npm run watch\" ",
     "prepare": "npm run-script build",
     "test": "node ./test/run.js",
     "lint": "bin/lint"
