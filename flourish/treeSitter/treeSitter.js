@@ -41,13 +41,56 @@
 
   }
 
+  let editmark=null;
+  let changemarks=null;
+
+
   function startTreeSitterParsing(cm) {
     var state = cm.state.treeSitterParse, options = state.options;
     state.socket = io('http://localhost:3000');
     state.socket.on('connect', function () {
       state.socket.emit('parse', cm.getValue())
       state.socket.on('parseComplete', function (treeInfo) {
-        console.log("parsecomplete", treeInfo);
+        if(editmark){
+          editmark.clear();
+          editmark = null;
+        }
+        if (treeInfo.changes) {
+          editmark = cm.doc.markText(
+            {
+              line: treeInfo.changes.editedRange.startPosition.row,
+              ch: treeInfo.changes.editedRange.startPosition.column
+            },
+            {
+              line: treeInfo.changes.editedRange.endPosition.row,
+              ch: treeInfo.changes.editedRange.endPosition.column
+            },
+            { className: "styled-background" });
+        }
+        //
+
+        if (changemarks) {
+          changemarks.forEach(item=>item.clear());
+          changemarks=null;
+        }
+
+        if (treeInfo.changes) {
+          changemarks=[];
+          treeInfo.changes.changedRange.forEach(item=>{
+            changemarks.push(  cm.doc.markText(
+              {
+                line: item.startPosition.row,
+                ch: item.startPosition.column
+              },
+              {
+                line: item.endPosition.row,
+                ch: item.endPosition.column
+              },
+              { className: "styled-background2" }));
+          });
+
+        }
+
         if (cm.getMode().hasOwnProperty("treeSitterTree"))
           cm.getMode().treeSitterTree = treeInfo;
         cm.operation(function () {
