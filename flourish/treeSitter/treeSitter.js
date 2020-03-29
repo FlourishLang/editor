@@ -65,7 +65,7 @@
               line: treeInfo.changes.editedRange.endPosition.row,
               ch: treeInfo.changes.editedRange.endPosition.column
             },
-            { className: "styled-background" });
+            { className: "edited-background" });
         }
         //
 
@@ -86,7 +86,7 @@
                 line: item.endPosition.row,
                 ch: item.endPosition.column
               },
-              { className: "styled-background2" }));
+              { className: "changed-background" }));
           });
 
         }
