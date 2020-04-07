@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "nodemon": "^2.0.2",
     "socket.io": "^2.3.0",
     "tree-sitter": "^0.16.0",
     "tree-sitter-flourish": "file:../../../../../../../../Volumes/Development/Projects/tree-sitter-flourish"

@@ -47,10 +47,20 @@
 
   function startTreeSitterParsing(cm) {
     var state = cm.state.treeSitterParse, options = state.options;
+
+    window.onbeforeunload = ()=>{
+      if (state && state.socket) {
+        state.socket.disconnect();
+      }
+    };
+  
+
+    
     state.socket = io('http://localhost:3000');
     state.socket.on('connect', function () {
       state.socket.emit('parse', cm.getValue())
       state.socket.on('parseComplete', function (treeInfo) {
+        console.log(treeInfo);
         if(editmark){
           editmark.clear();
           editmark = null;
