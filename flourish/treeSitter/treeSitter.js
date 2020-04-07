@@ -60,7 +60,7 @@
     state.socket.on('connect', function () {
       state.socket.emit('parse', cm.getValue())
       state.socket.on('parseComplete', function (treeInfo) {
-        console.log(treeInfo);
+        // console.log(treeInfo);
         if(editmark){
           editmark.clear();
           editmark = null;

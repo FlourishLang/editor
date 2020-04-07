@@ -13,10 +13,10 @@ io.on('connection', socket => {
 
     socket.on('parse', sourceCode => {
         tree = parser.parse(sourceCode);
-        const info = fnode.reConciliation(fnodeTree,null,tree)
+        fnodeTree = fnode.reConciliation(fnodeTree,null,tree)
 
         
-        socket.emit('parseComplete', info);
+        socket.emit('parseComplete', fnodeTree);
 
     });
 
@@ -29,10 +29,10 @@ io.on('connection', socket => {
         let changedRange = tree.getChangedRanges(newtree);
 
         let editedRange = tree.getEditedRange()
-        let info = fnode.reConciliation(fnodeTree,tree,newtree)
+        fnodeTree = fnode.reConciliation(fnodeTree,tree,newtree)
 
-        info.changes = {changedRange,editedRange};
-        socket.emit('parseComplete', info);
+        fnodeTree.changes = {changedRange,editedRange};
+        socket.emit('parseComplete', fnodeTree);
         tree = newtree;
 
 
