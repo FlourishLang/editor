@@ -4,8 +4,8 @@
 class FNode {
 
     constructor(node){
-        this.apply(node);
         this.children = [];
+        this.apply(node);
     }
 
 
@@ -14,23 +14,42 @@ class FNode {
         Object.assign(this,data);
     }
 
+    applyTree(node){
+        this.apply(node);
+        this.children.forEach((child,index)=>{child.applyTree(node.children[index])});
+    }
+
 };
+
+
 
 
 function isEqaulNode(first,next){
     if (first["0"] === next["0"])
         return true;
 
-    if(first.childCount!=next.childCount)
+    if (first.type != next.type) {
         return false;
+    }
+    
+    
+    if (first.childCount != next.childCount) {
+        console.log("Same child count mismatch");
+        return false;
+    }
+
+    if(first.childCount ==0)
+    return false;
 
     let mismatch =first.children.find((child,index)=>{
-        return child["0"]!=next.children[index]["0"];
+        return !isEqaulNode(child,next.children[index]);
     })
 
     return !mismatch;
 
 }
+
+
 
 function reConciliationNode(originalFnodeTree, originalTsTree, node) {
     if (originalTsTree == null) {
@@ -41,9 +60,8 @@ function reConciliationNode(originalFnodeTree, originalTsTree, node) {
     } else {
 
         if (isEqaulNode(originalTsTree,node)) {
-            originalFnodeTree.apply(node);
-
             console.log("resusing",originalFnodeTree.type,node.text );
+            originalFnodeTree.applyTree(node);
             return originalFnodeTree;
         } else {
             let fnode = new FNode(node)
