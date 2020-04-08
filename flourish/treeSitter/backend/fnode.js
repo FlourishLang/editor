@@ -3,8 +3,9 @@
 
 class FNode {
 
-    constructor(tsnode){
-        this.tsnode = tsnode;
+    constructor(node){
+        let data = {startPosition: node.startPosition, type: node.type, endPosition: node.endPosition };
+        Object.assign(this,data);
         this.children = [];
     }
 
@@ -16,10 +17,10 @@ class FNode {
 
 function reConciliationNode(originalFnodeTree,originalTsTree,node)
 {
-    let info = { startPosition: node.startPosition, type: node.type, endPosition: node.endPosition }
-    info.children = node.children.map((child)=>reConciliationNode(originalFnodeTree,originalTsTree,child))
+    let fnode = new FNode(node)
+    fnode.children = node.children.map((child)=>reConciliationNode(originalFnodeTree,originalTsTree,child))
 
-    return info;
+    return fnode;
 }
 
 FNode.reConciliation = function (originalFnodeTree,originalTsTree,newTsTree) {
