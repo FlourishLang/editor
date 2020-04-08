@@ -12,22 +12,21 @@ class FNode {
 
 
 
-function walk(node) {
-    let info = { id:node["0"],startPosition: node.startPosition, type: node.type, endPosition: node.endPosition }
-    if (node.childCount) {
-        info.children = [];
-        let child = node.firstChild;
-        do {
-            info.children.push(walk(child));
-        } while (child = child.nextSibling)
-    }
+
+
+function reConciliationNode(originalFnodeTree,originalTsTree,node)
+{
+    let info = { startPosition: node.startPosition, type: node.type, endPosition: node.endPosition }
+    info.children = node.children.map((child)=>reConciliationNode(originalFnodeTree,originalTsTree,child))
 
     return info;
 }
 
 FNode.reConciliation = function (originalFnodeTree,originalTsTree,newTsTree) {
-    
-    return  walk(newTsTree.rootNode);
+    return reConciliationNode(
+        originalFnodeTree,
+        originalTsTree?originalTsTree.rootNode:null,
+        newTsTree.rootNode)
 }
 
 
