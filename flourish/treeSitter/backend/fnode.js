@@ -3,47 +3,72 @@
 
 class FNode {
 
-    constructor(node){
+    constructor(node) {
         this.children = [];
+        this.leafText = "";
         this.apply(node);
+
     }
 
 
-    apply(node){
-        let data = {startPosition: node.startPosition, type: node.type, endPosition: node.endPosition };
-        Object.assign(this,data);
+    apply(node) {
+        let data = { startPosition: node.startPosition, type: node.type, endPosition: node.endPosition };
+        if (node.childCount == 0)
+            this.leafText = node.text;
+        Object.assign(this, data);
     }
 
-    applyTree(node){
+    applyTree(node) {
         this.apply(node);
-        this.children.forEach((child,index)=>{child.applyTree(node.children[index])});
+        this.children.forEach((child, index) => { child.applyTree(node.children[index]) });
     }
 
 };
 
+let mapMemorization = new Map()
+function isEqualNodeMemory(first, next, fNode) {
+    let key = "" + first["0"] + "" + next["0"];
+    if (mapMemorization.has(key))
+        return mapMemorization.get(key);
+    let result = isEqualNode(first, next, fNode);
+    mapMemorization.set(key, result);
+    return result
+}
 
 
+function isEqualNode(first, next, fNode) {
 
-function isEqaulNode(first,next){
     if (first["0"] === next["0"])
         return true;
 
     if (first.type != next.type) {
+        console.log("Type mismatch" + first.type);
+
         return false;
     }
-    
-    
+
+
     if (first.childCount != next.childCount) {
         console.log("Same child count mismatch");
         return false;
     }
 
-    if(first.childCount ==0)
-    return false;
+    if (first.childCount == 0 && next.text == fNode.leafText) {
+        return true;
+    }
 
-    let mismatch =first.children.find((child,index)=>{
-        return !isEqaulNode(child,next.children[index]);
+
+    if (first.childCount == 0) {
+        debugger
+        console.log("Leaf", first.text, first)
+        return false;
+    }
+
+    let mismatch = first.children.find((child, index) => {
+        return !isEqualNodeMemory(child, next.children[index], fNode.children[index]);
     })
+
+
 
     return !mismatch;
 
@@ -51,33 +76,34 @@ function isEqaulNode(first,next){
 
 
 
-function reConciliationNode(originalFnodeTree, originalTsTree, node) {
+function reConciliationNode(originalFNodeTree, originalTsTree, node) {
     if (originalTsTree == null) {
-        let fnode = new FNode(node)
-        fnode.children = node.children.map((child) => reConciliationNode(originalFnodeTree, originalTsTree, child))
+        let fNode = new FNode(node)
+        fNode.children = node.children.map((child) => reConciliationNode(originalFNodeTree, originalTsTree, child))
 
-        return fnode;
+        return fNode;
     } else {
 
-        if (isEqaulNode(originalTsTree,node)) {
-            console.log("resusing",originalFnodeTree.type,node.text );
-            originalFnodeTree.applyTree(node);
-            return originalFnodeTree;
+        if (isEqualNodeMemory(originalTsTree, node, originalFNodeTree)) {
+            console.log("reusing", originalFNodeTree.type, node.text);
+            originalFNodeTree.applyTree(node);
+            return originalFNodeTree;
         } else {
-            let fnode = new FNode(node)
-            fnode.children = node.children.map((child, index) => reConciliationNode(originalFnodeTree.children[index], originalTsTree.children[index], child))
+            let fNode = new FNode(node)
+            fNode.children = node.children.map((child, index) => reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index], child))
 
-            return fnode;
+            return fNode;
         }
 
     }
 
 }
 
-FNode.reConciliation = function (originalFnodeTree,originalTsTree,newTsTree) {
+FNode.reConciliation = function (originalFNodeTree, originalTsTree, newTsTree) {
+    mapMemorization.clear();
     return reConciliationNode(
-        originalFnodeTree,
-        originalTsTree?originalTsTree.rootNode:null,
+        originalFNodeTree,
+        originalTsTree ? originalTsTree.rootNode : null,
         newTsTree.rootNode)
 }
 
