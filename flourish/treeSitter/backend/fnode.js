@@ -23,6 +23,18 @@ class FNode {
         this.children.forEach((child, index) => { child.applyTree(node.children[index]) });
     }
 
+    didUpdate() {
+
+    }
+    didMount() {
+
+    }
+
+
+    willUnMount() {
+
+    }
+
 };
 
 let mapMemorization = new Map()
@@ -42,14 +54,14 @@ function isEqualNode(first, next, fNode) {
         return true;
 
     if (first.type != next.type) {
-        console.log("Type mismatch" + first.type);
+        // console.log("Type mismatch" + first.type);
 
         return false;
     }
 
 
     if (first.childCount != next.childCount) {
-        console.log("Same child count mismatch");
+        // console.log("Same child count mismatch");
         return false;
     }
 
@@ -59,8 +71,8 @@ function isEqualNode(first, next, fNode) {
 
 
     if (first.childCount == 0) {
-        debugger
-        console.log("Leaf", first.text, first)
+        // debugger
+        // console.log("Leaf", first.text, first)
         return false;
     }
 
@@ -80,24 +92,93 @@ function reConciliationNode(originalFNodeTree, originalTsTree, node) {
     if (originalTsTree == null) {
         let fNode = new FNode(node)
         fNode.children = node.children.map((child) => reConciliationNode(originalFNodeTree, originalTsTree, child))
+        return fNode;
+
+    } else if (isEqualNodeMemory(originalTsTree, node, originalFNodeTree)) {
+        console.log("reusing", originalFNodeTree.type, node.text);
+        originalFNodeTree.applyTree(node);
+        return originalFNodeTree;
+
+    } else if (originalFNodeTree.type == node.type) {
+
+        originalFNodeTree.apply(node);
+        // fNode.children = node.children.map((child, index) => reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index], child))
+        for (let index = 0; index < node.childCount; index++) {
+
+            if (originalFNodeTree.children.length == node.childCount) {
+
+                let newFNodeChild = reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index], child);
+                if (newFNodeChild) {
+                    originalFNodeTree.children[index] = newFNodeChild;
+                    newFNodeChild.didUpdate();
+                }
+                else {
+                    let newFNodeChild = reConciliationNode(null, null, child);
+                    originalFNodeTree.children[index].willUnMount();
+                    originalFNodeTree.children[index] = newFNodeChild;
+                    newFNodeChild.didMount();
+                }
+
+            }
+
+            else if (originalFNodeTree.children.length > node.childCount) {
+
+                let newFNodeChild = reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index], child);
+                if (newFNodeChild) {
+                    originalFNodeTree.children[index] = newFNodeChild;
+                    newFNodeChild.didUpdate();
+                }
+                else {
+
+                    //abcde
+                    //abde
+                    originalFNodeTree.children[index].willUnMount();
+                    originalFNodeTree.children.splice(index, 1);
+                    index--;
+                }
+
+            } else if (originalFNodeTree.children.length < node.childCount) {
+                if (originalFNodeTree.children.length <= index) {
+                    let newFNodeChild = reConciliationNode(null, null, child);
+                    originalFNodeTree.children.push(newFNodeChild);
+                    newFNodeChild.didMount();
+                } else {
+                    let newFNodeChild = reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index], child);
+                    if (newFNodeChild) {
+                        originalFNodeTree.children[index] = newFNodeChild;
+                        newFNodeChild.didUpdate();
+                    } else {
+                        let newFNodeChild = reConciliationNode(null, null, child);
+                        originalFNodeTree.children.splice(index, 0, newFNodeChild);
+                        newFNodeChild.didMount();
+                    }
+                }
+
+            }
+
+
+
+
+        }
+
+        if (originalFNodeTree.children.length > node.childCount) {
+            for (let index = node.childCount; index < originalFNodeTree.children.length; index++) {
+                originalFNodeTree.children[index].willUnMount();
+            }
+            originalFNodeTree.splice(node.childCount, originalFNodeTree.children.length - node.childCount);
+
+        }
+
 
         return fNode;
     } else {
 
-        if (isEqualNodeMemory(originalTsTree, node, originalFNodeTree)) {
-            console.log("reusing", originalFNodeTree.type, node.text);
-            originalFNodeTree.applyTree(node);
-            return originalFNodeTree;
-        } else {
-            let fNode = new FNode(node)
-            fNode.children = node.children.map((child, index) => reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index], child))
-
-            return fNode;
-        }
-
+        return null;
     }
 
 }
+
+
 
 FNode.reConciliation = function (originalFNodeTree, originalTsTree, newTsTree) {
     mapMemorization.clear();
