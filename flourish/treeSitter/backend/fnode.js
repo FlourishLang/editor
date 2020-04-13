@@ -169,7 +169,7 @@ function reConciliationNode(originalFNodeTree, originalTsTree, node) {
             for (let index = node.childCount; index < originalFNodeTree.children.length; index++) {
                 originalFNodeTree.children[index].willUnMount();
             }
-            originalFNodeTree.splice(node.childCount, originalFNodeTree.children.length - node.childCount);
+            originalFNodeTree.children.splice(node.childCount, originalFNodeTree.children.length - node.childCount);
 
         }
 
