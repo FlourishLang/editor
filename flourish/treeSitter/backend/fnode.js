@@ -103,11 +103,12 @@ function reConciliationNode(originalFNodeTree, originalTsTree, node) {
 
         originalFNodeTree.apply(node);
         // fNode.children = node.children.map((child, index) => reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index], child))
+        let indexOffSet = 0;
         for (let index = 0; index < node.childCount; index++) {
-
+            let child = node.children[index];
             if (originalFNodeTree.children.length == node.childCount) {
 
-                let newFNodeChild = reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index], child);
+                let newFNodeChild = reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index + indexOffSet], child);
                 if (newFNodeChild) {
                     originalFNodeTree.children[index] = newFNodeChild;
                     newFNodeChild.didUpdate();
@@ -119,11 +120,12 @@ function reConciliationNode(originalFNodeTree, originalTsTree, node) {
                     newFNodeChild.didMount();
                 }
 
+
             }
 
             else if (originalFNodeTree.children.length > node.childCount) {
 
-                let newFNodeChild = reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index], child);
+                let newFNodeChild = reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index + indexOffSet], child);
                 if (newFNodeChild) {
                     originalFNodeTree.children[index] = newFNodeChild;
                     newFNodeChild.didUpdate();
@@ -134,6 +136,7 @@ function reConciliationNode(originalFNodeTree, originalTsTree, node) {
                     //abde
                     originalFNodeTree.children[index].willUnMount();
                     originalFNodeTree.children.splice(index, 1);
+                    indexOffSet += 1;
                     index--;
                 }
 
@@ -143,13 +146,14 @@ function reConciliationNode(originalFNodeTree, originalTsTree, node) {
                     originalFNodeTree.children.push(newFNodeChild);
                     newFNodeChild.didMount();
                 } else {
-                    let newFNodeChild = reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index], child);
+                    let newFNodeChild = reConciliationNode(originalFNodeTree.children[index], originalTsTree.children[index + indexOffSet], child);
                     if (newFNodeChild) {
                         originalFNodeTree.children[index] = newFNodeChild;
                         newFNodeChild.didUpdate();
                     } else {
                         let newFNodeChild = reConciliationNode(null, null, child);
                         originalFNodeTree.children.splice(index, 0, newFNodeChild);
+                        indexOffSet -= 1;
                         newFNodeChild.didMount();
                     }
                 }
@@ -170,7 +174,7 @@ function reConciliationNode(originalFNodeTree, originalTsTree, node) {
         }
 
 
-        return fNode;
+        return originalFNodeTree;
     } else {
 
         return null;
