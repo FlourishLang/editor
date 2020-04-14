@@ -95,7 +95,7 @@ function reConciliationNode(originalFNodeTree, originalTsTree, node) {
         return fNode;
 
     } else if (isEqualNodeMemory(originalTsTree, node, originalFNodeTree)) {
-        console.log("reusing", originalFNodeTree.type, node.text);
+        // console.log("reusing", originalFNodeTree.type, node.text);
         originalFNodeTree.applyTree(node);
         return originalFNodeTree;
 
@@ -186,6 +186,7 @@ function reConciliationNode(originalFNodeTree, originalTsTree, node) {
 
 FNode.reConciliation = function (originalFNodeTree, originalTsTree, newTsTree) {
     mapMemorization.clear();
+    console.log(newTsTree);
     return reConciliationNode(
         originalFNodeTree,
         originalTsTree ? originalTsTree.rootNode : null,
