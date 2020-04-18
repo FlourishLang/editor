@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "",
   "license": "ISC",
@@ -13,5 +13,8 @@
     "socket.io": "^2.3.0",
     "tree-sitter": "^0.16.0",
     "tree-sitter-flourish": "file:../../../../../../../../Volumes/Development/Projects/tree-sitter-flourish"
+  },
+  "devDependencies": {
+    "mocha": "^7.1.1"
   }
 }
