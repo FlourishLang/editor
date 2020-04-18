@@ -1,41 +1,22 @@
-const Parser = require('tree-sitter');
-const Flourish = require('tree-sitter-flourish');
 
-const parser = new Parser();
-parser.setLanguage(Flourish);
-
-const fNode = require('./FNode.js');
 const server = require('http').createServer();
 const io = require('socket.io')(server);
+const Parser = require('./Parser')
 io.on('connection', socket => {
-    let tree = null;
-    let fNodeTree = null;
-
-    socket.on('parse', sourceCode => {
-        tree = parser.parse(sourceCode);
-        fNodeTree = fNode.reConciliation(fNodeTree, null, tree)
-        socket.emit('parseComplete', fNodeTree);
-
+    let parser = new Parser();
+    socket.on('parse', sourceCode => {        
+        socket.emit('parseComplete', parser.parse((sourceCode)));
     });
 
     socket.on('parseIncremental', data => {
-        const newSourceCode = data.newText;
-        tree.edit(data.posInfo);
+        const newSourceCode = data.newtext;
 
-
-        let newTree = parser.parse(newSourceCode, tree);
-        let changedRange = tree.getChangedRanges(newTree);
-
-        let editedRange = tree.getEditedRange()
-        fNodeTree = fNode.reConciliation(fNodeTree, tree, newTree)
-
-        fNodeTree.changes = { changedRange, editedRange };
-        socket.emit('parseComplete', fNodeTree);
-        tree = newtTee;
-
+        const [tree,changes] = parser.parseIncremental(newSourceCode,data.posInfo)
+        
+        tree.changes = changes;
+        socket.emit('parseComplete', tree);
 
     });
-
 
 });
 server.listen(3000);
