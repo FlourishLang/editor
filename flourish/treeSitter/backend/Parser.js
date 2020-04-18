@@ -11,7 +11,7 @@ const FNode = require('./FNode.js');
         let parser = new Parser();
         parser.setLanguage(Flourish);
 
-        this.tSTree = null;
+        this.tsTree = null;
         this.fNodeTree = null;
         this.parser = parser;
     
@@ -19,13 +19,13 @@ const FNode = require('./FNode.js');
 
     parse(sourceCode)
     {
-        this.tSTree = this.parser.parse(sourceCode);
-        this.fNodeTree = FNode.reConciliation(this.fNodeTree, null, this.tSTree);
+        this.tsTree = this.parser.parse(sourceCode);
+        this.fNodeTree = FNode.reConciliation(this.fNodeTree, null, this.tsTree);
         return this.fNodeTree;
     }
 
     parseIncremental(newSourceCode,treeEditInfo){
-        const tree = this.tSTree;
+        const tree = this.tsTree;
         tree.edit(treeEditInfo);
 
 
@@ -36,7 +36,7 @@ const FNode = require('./FNode.js');
         this.fNodeTree = FNode.reConciliation(this.fNodeTree, tree, newTree)
 
         const changes = { changedRange, editedRange };
-        this.tSTree = newTree;
+        this.tsTree = newTree;
         return [this.fNodeTree,changes];
 
     }
