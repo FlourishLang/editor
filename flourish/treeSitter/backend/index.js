@@ -4,36 +4,34 @@ const Flourish = require('tree-sitter-flourish');
 const parser = new Parser();
 parser.setLanguage(Flourish);
 
-const fnode = require('./fnode.js');
+const fNode = require('./fnode.js');
 const server = require('http').createServer();
 const io = require('socket.io')(server);
 io.on('connection', socket => {
     let tree = null;
-    let fnodeTree = null;
+    let fNodeTree = null;
 
     socket.on('parse', sourceCode => {
         tree = parser.parse(sourceCode);
-        fnodeTree = fnode.reConciliation(fnodeTree,null,tree)
-
-        
-        socket.emit('parseComplete', fnodeTree);
+        fNodeTree = fNode.reConciliation(fNodeTree, null, tree)
+        socket.emit('parseComplete', fNodeTree);
 
     });
 
     socket.on('parseIncremental', data => {
-        const newSourceCode = data.newtext;
+        const newSourceCode = data.newText;
         tree.edit(data.posInfo);
-        
 
-        let newtree = parser.parse(newSourceCode, tree);
-        let changedRange = tree.getChangedRanges(newtree);
+
+        let newTree = parser.parse(newSourceCode, tree);
+        let changedRange = tree.getChangedRanges(newTree);
 
         let editedRange = tree.getEditedRange()
-        fnodeTree = fnode.reConciliation(fnodeTree,tree,newtree)
+        fNodeTree = fNode.reConciliation(fNodeTree, tree, newTree)
 
-        fnodeTree.changes = {changedRange,editedRange};
-        socket.emit('parseComplete', fnodeTree);
-        tree = newtree;
+        fNodeTree.changes = { changedRange, editedRange };
+        socket.emit('parseComplete', fNodeTree);
+        tree = newtTee;
 
 
     });
