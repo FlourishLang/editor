@@ -1,11 +1,9 @@
-const EventEmitter = require('events');
 
 
 
-class FNode  extends EventEmitter {
+class FNode   {
 
     constructor(newTsTree) {
-        super();
         this.children = [];
         this.leafText = "";
         this.apply(newTsTree);
@@ -102,13 +100,10 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
                 let newFNodeChild = reConciliationNode(oldFNodeTree.children[index], oldTsTree.children[index + indexOffSet], child);
                 if (newFNodeChild) {
                     oldFNodeTree.children[index] = newFNodeChild;
-                    newFNodeChild.emit("didUpdate");
                 }
                 else {
                     let newFNodeChild = reConciliationNode(null, null, child);
-                    oldFNodeTree.children[index].emit("willUnMount");
                     oldFNodeTree.children[index] = newFNodeChild;
-                    newFNodeChild.emit("didMount");
                 }
 
 
@@ -119,11 +114,9 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
                 let newFNodeChild = reConciliationNode(oldFNodeTree.children[index], oldTsTree.children[index + indexOffSet], child);
                 if (newFNodeChild) {
                     oldFNodeTree.children[index] = newFNodeChild;
-                    newFNodeChild.emit("didUpdate");
                 }
                 else {
 
-                    oldFNodeTree.children[index].emit("willUnMount");
                     oldFNodeTree.children.splice(index, 1);
                     indexOffSet += 1;
                     index--;
@@ -133,17 +126,14 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
                 if (oldFNodeTree.children.length <= index) {
                     let newFNodeChild = reConciliationNode(null, null, child);
                     oldFNodeTree.children.push(newFNodeChild);
-                    newFNodeChild.emit("didMount");
                 } else {
                     let newFNodeChild = reConciliationNode(oldFNodeTree.children[index], oldTsTree.children[index + indexOffSet], child);
                     if (newFNodeChild) {
                         oldFNodeTree.children[index] = newFNodeChild;
-                        newFNodeChild.emit("didUpdate");
                     } else {
                         let newFNodeChild = reConciliationNode(null, null, child);
                         oldFNodeTree.children.splice(index, 0, newFNodeChild);
                         indexOffSet -= 1;
-                        newFNodeChild.emit("didMount");
                     }
                 }
 
@@ -156,7 +146,6 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
 
         if (oldFNodeTree.children.length > newTsTree.childCount) {
             for (let index = newTsTree.childCount; index < oldFNodeTree.children.length; index++) {
-                oldFNodeTree.children[index].emit("willUnMount");
             }
             oldFNodeTree.children.splice(newTsTree.childCount, oldFNodeTree.children.length - newTsTree.childCount);
 
