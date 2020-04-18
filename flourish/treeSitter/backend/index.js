@@ -4,7 +4,7 @@ const Flourish = require('tree-sitter-flourish');
 const parser = new Parser();
 parser.setLanguage(Flourish);
 
-const fNode = require('./fnode.js');
+const fNode = require('./FNode.js');
 const server = require('http').createServer();
 const io = require('socket.io')(server);
 io.on('connection', socket => {
