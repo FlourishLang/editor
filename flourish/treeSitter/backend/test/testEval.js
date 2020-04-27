@@ -1,11 +1,20 @@
 var evaluate = require('../evaluate.js');
 var assert = require('assert');
+var Parser = require('../Parser.js');
 
 
 describe("Eval", () => {
-    it('should print basic statement', () => {
-        
-        assert.equal(evaluate("print (+ 1 2)"),"print (+ 1 2)\n")
+
+    it('should eval basic statement', () => {        
+        let flourishParser = new Parser();  
+        let tree = flourishParser.parse(" + 1 2\n");      
+        assert.equal(evaluate(tree.children[0].children[0]),3)
+    });
+
+    it('should eval basic statement', () => {        
+        let flourishParser = new Parser();  
+        let tree = flourishParser.parse(" + 1  (- 2 6)\n");      
+        assert.equal(evaluate(tree.children[0].children[0]),-3)
     });
 
     

@@ -1,10 +1,41 @@
 const Parser = require("./Parser.js")
-const print = require("./print.js");
 
-function evaluate(inputString) {
-    let flourishParser = new Parser();
-    let tree = flourishParser.parse(inputString)
-    return print(tree);
+function evaluate(ast) {
+    switch (ast.type) {
+        case "expression":
+            {
+                let cmd = evaluate(ast.children[0]);
+                args = ast.children.slice(1);
+                return cmd.call(null, args);
+            }
+        case "compoundExpression":
+            {
+                let actualChildren = ast.children.slice(1);
+                actualChildren.pop();
+                let result = evaluate(actualChildren[0]);
+                return result;
+            }
+            break;
+
+        case "cmd": case "operator": case 'argument':
+            return evaluate(ast.children[0]);
+
+        case "+":
+            return function add(args) {
+                return args.map(evaluate).reduce((p, c) => p + c);
+            }
+        case "-":
+            return function add(args) {
+                return args.map(evaluate).reduce((p, c) => p - c);
+            }
+        case "number":
+            return parseInt(ast.leafText);
+
+
+        default:
+            throw ("Cannot evaluate:" + ast.type);
+            break;
+    }
 }
 
 module.exports = evaluate;
