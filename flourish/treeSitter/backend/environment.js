@@ -18,9 +18,16 @@ let env = {
     'set': function (args) {
 
         let identifier = args[0].children[0].leafText
-        env[identifier] = evaluate(args[1],env);
-
-        return env[identifier];                
+        if(env[identifier] == undefined)
+        {
+            env[identifier] = evaluate(args[1],env);
+            return env[identifier];                
+        }else
+        {
+            return "ERROR";
+        }
+            
+        
     }
 
 

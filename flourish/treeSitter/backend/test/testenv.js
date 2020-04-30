@@ -27,7 +27,6 @@ describe("Eval", () => {
     });
 
     it('should eval set  - 3  (add 1 3) 2', () => {   
-        debugger;
         let flourishParser = new Parser();  
         let tree = flourishParser.parse("set a  (add 1 3)\n");      
         evaluate(tree.children[0].children[0],environment);
@@ -35,6 +34,20 @@ describe("Eval", () => {
         assert.equal(evaluate(tree.children[0].children[0],environment),6);
 
     });
+
+    it('should fail seting same variable 2nd time', () => {   
+        let flourishParser = new Parser();  
+        let tree = flourishParser.parse("set a  (add 1 3)\n");      
+        evaluate(tree.children[0].children[0],environment);
+         tree = flourishParser.parse("set a  3000\n");      
+         tree = flourishParser.parse("+ a 2");      
+
+        assert.equal(evaluate(tree.children[0].children[0],environment),'ERROR');
+
+    });
+
+
+
 
 
     
