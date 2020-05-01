@@ -7,7 +7,7 @@ function evaluate(ast,env) {
             {
                 let cmd = evaluate(ast.children[0],env);
                 args = ast.children.slice(1);
-                return cmd.call(null, args);
+                return cmd.call(null, args,env);
             }
         case "compoundExpression":
             {
@@ -19,7 +19,7 @@ function evaluate(ast,env) {
             break;
             
         case "identifier": 
-            return env[ast.leafText];
+            return env["get"].call(this,ast);
 
         case "cmd": case "operator": case 'argument':
             return evaluate(ast.children[0],env);

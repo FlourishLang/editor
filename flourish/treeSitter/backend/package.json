@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "debug": "node --inspect-brk node_modules/./mocha/bin/_mocha"
   },
   "author": "",
   "license": "ISC",
