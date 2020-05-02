@@ -15,24 +15,13 @@
 
 
   CodeMirror.registerHelper("lint", "flourish", function(text, options) {
-    var found = [];
-    if (!window.CSSLint) {
-      if (window.console) {
-          window.console.error("Error: window.CSSLint not defined, CodeMirror CSS linting cannot run.");
-      }
-      return found;
-    }
-    var results = CSSLint.verify(text, options), messages = results.messages, message = null;
-    for ( var i = 0; i < messages.length; i++) {
-      message = messages[i];
-      var startLine = message.line -1, endLine = message.line -1, startCol = message.col -1, endCol = message.col;
+    var found=[];
       found.push({
-        from: CodeMirror.Pos(startLine, startCol),
-        to: CodeMirror.Pos(endLine, endCol),
-        message: message.message,
-        severity : message.type
+        from: CodeMirror.Pos(0, 0),
+        to: CodeMirror.Pos(0, 20),
+        message: "Successfully showing error message",
+        severity : "error"
       });
-    }
     return found;
   });
   

@@ -9,13 +9,14 @@
 
 
 <script src="lib/codemirror.js"></script>
-<script src="mode/css/css.js"></script>
 <script src="addon/edit/matchbrackets.js"></script>
 <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 <script src="addon/selection/active-line.js"></script>
 <script src="flourish/flourishMode.js"></script>
 <script src="flourish/treeSitter/treeSitter.js"></script>
 <script src="addon/lint/lint.js"></script>
+<link rel="stylesheet" href="addon/lint/lint.css">
+
 
 
 
@@ -50,10 +51,12 @@ defun (max (x 200) (y 455))
       lineNumbers: true,
       mode: 'text/x-flourish',
       matchBrackets: true,
-      // theme:"material",
+      //  theme:"material",
       treeSitter: true,
       lint:true,
-      styleActiveLine: true
+      styleActiveLine: true,
+      gutters: ["CodeMirror-lint-markers"],
+
 
     });
     // editor.markText({line: 0, ch: 5}, {line: 0, ch: 10}, {className: "styled-background",clearOnEnter:true});
