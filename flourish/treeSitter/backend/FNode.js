@@ -7,6 +7,7 @@ class FNode   {
         this.children = [];
         this.leafText = "";
         this.isMissingNode = false;
+        this.hasError = false;
         this.apply(newTsTree);
 
     }
@@ -14,7 +15,8 @@ class FNode   {
 
     apply(newTsTree) {
         let data = { startPosition: newTsTree.startPosition, type: newTsTree.type, endPosition: newTsTree.endPosition };
-        this.isMissingNode = newTsTree.isMissing()
+        this.isMissingNode = newTsTree.isMissing();
+        this.hasError = newTsTree.hasError();
         if (newTsTree.childCount == 0)
             this.leafText = newTsTree.text;
 

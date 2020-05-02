@@ -18,7 +18,6 @@ function patchTree(tree, env) {
                 mayBeStatement.type = "ERROR";
             }
 
-
         }
         return mayBeStatement;
     });

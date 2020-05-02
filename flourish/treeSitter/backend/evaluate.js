@@ -39,7 +39,7 @@ let specialEnv = {
 
 
 function evaluate(ast, env) {
-    if (ast.isMissingNode) {
+    if (ast.hasError) {
         return new ERROR("Syntax error Missing " + ast.type);
     }
     switch (ast.type) {
