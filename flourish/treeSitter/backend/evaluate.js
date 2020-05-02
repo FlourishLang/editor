@@ -1,4 +1,38 @@
-const Parser = require("./Parser.js");
+
+class ERROR {
+    constructor(message) {
+        this.message = message;
+    }
+}
+
+let specialEnv = {
+
+    'set': function (args, env) {
+
+        let identifier = args[0].children[0].leafText
+        if (env[identifier] == undefined) {
+            env[identifier] = evaluate(args[1], env);
+            return env[identifier];
+        } else {
+            return new ERROR(`Can't reset identifier: ${identifier}`)
+        }
+
+    },
+    'get': function get(arg, env) {
+        let identifier = arg.leafText;
+        if (env[identifier] == undefined) {
+            if (env.super)
+                return get(arg, env.super);
+            return new ERROR(`Can't find identifier: ${identifier}`);
+        } else {
+            return env[identifier];
+        }
+
+    }
+
+
+}
+
 
 
 function evaluate(ast,env) {
@@ -19,19 +53,18 @@ function evaluate(ast,env) {
             break;
             
         case "identifier": 
-            return env["get"].call(this,ast);
+            if(specialEnv[ast.leafText])
+                return specialEnv[ast.leafText];
+            return specialEnv["get"].call(this,ast,env);
 
         case "cmd": case "operator": case 'argument':
             return evaluate(ast.children[0],env);
 
         case "+":
-            return function add(args) {
-                return args.map(i=>evaluate(i,env)).reduce((p, c) => p + c);
-            }
+            return specialEnv["get"].call(this,{leafText:"add"},env);
         case "-":
-            return function add(args) {
-                return args.map(i=>evaluate(i,env)).reduce((p, c) => p - c);
-            }
+            return specialEnv["get"].call(this,{leafText:"subtract"},env);
+
         case "number":
             return parseInt(ast.leafText);
 
