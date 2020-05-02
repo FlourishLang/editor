@@ -9,6 +9,9 @@ let specialEnv = {
 
     'set': function (args, env) {
 
+        if (args.length != 2)
+            return new ERROR(`Mismatching no of argument for set: ${args.length}`)
+
         let identifier = args[0].children[0].leafText
         if (env[identifier] == undefined) {
             env[identifier] = evaluate(args[1], env);

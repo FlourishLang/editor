@@ -8,10 +8,16 @@ const envCreate = require('./environment').create;
 function patchTree(tree, env) {
     tree.children = tree.children.map(mayBeStatement => {
         if (mayBeStatement.type == 'statement') {
-            let result = evaluate(mayBeStatement.children[0], env);
-            if (result && result.constructor.name == 'ERROR') {
+            try {
+                let result = evaluate(mayBeStatement.children[0], env);
+                if (result && result.constructor.name == 'ERROR') {
+                    mayBeStatement.type = "ERROR";
+                }
+            } catch (error) {
+                console.log("Unhandled error in eval",error);
                 mayBeStatement.type = "ERROR";
             }
+
 
         }
         return mayBeStatement;
