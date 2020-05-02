@@ -40,39 +40,39 @@ let specialEnv = {
 
 function evaluate(ast, env) {
     if (ast.isMissingNode) {
-        return new ERROR("Syntax error Missing "+ast.type);
+        return new ERROR("Syntax error Missing " + ast.type);
     }
     switch (ast.type) {
         case "expression":
             {
-                let cmd = evaluate(ast.children[0],env);
+                let cmd = evaluate(ast.children[0], env);
                 if (cmd.constructor == ERROR) {
                     return cmd;
                 }
                 args = ast.children.slice(1);
-                return cmd.call(null, args,env);
+                return cmd.call(null, args, env);
             }
         case "compoundExpression":
             {
                 let actualChildren = ast.children.slice(1);
                 actualChildren.pop();
-                let result = evaluate(actualChildren[0],env);
+                let result = evaluate(actualChildren[0], env);
                 return result;
             }
             break;
-            
-        case "identifier": 
-            if(specialEnv[ast.leafText])
+
+        case "identifier":
+            if (specialEnv[ast.leafText])
                 return specialEnv[ast.leafText];
-            return specialEnv["get"].call(this,ast,env);
+            return specialEnv["get"].call(this, ast, env);
 
         case "cmd": case "operator": case 'argument':
-            return evaluate(ast.children[0],env);
+            return evaluate(ast.children[0], env);
 
         case "+":
-            return specialEnv["get"].call(this,{leafText:"add"},env);
+            return specialEnv["get"].call(this, { leafText: "add" }, env);
         case "-":
-            return specialEnv["get"].call(this,{leafText:"subtract"},env);
+            return specialEnv["get"].call(this, { leafText: "subtract" }, env);
 
         case "number":
             return parseInt(ast.leafText);
