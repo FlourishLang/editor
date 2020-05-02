@@ -40,6 +40,9 @@ function evaluate(ast,env) {
         case "expression":
             {
                 let cmd = evaluate(ast.children[0],env);
+                if (cmd.constructor == ERROR) {
+                    return cmd;
+                }
                 args = ast.children.slice(1);
                 return cmd.call(null, args,env);
             }
