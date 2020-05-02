@@ -6,24 +6,7 @@ var Parser = require('../Parser.js');
 
 describe("Eval", () => {
 
-    it('should eval environment', () => {   
-        let flourishParser = new Parser();  
-        let tree = flourishParser.parse("add  1 2\n");      
-        assert.equal(evaluate(tree.children[0].children[0],env.create()),3)
-    });
-
-    it('should eval add  (+2 1) 2', () => {   
-        let flourishParser = new Parser();  
-        let tree = flourishParser.parse("add  (+2 1) 2\n");      
-        assert.equal(evaluate(tree.children[0].children[0],env.create()),5)
-    });
-
-
-    it('should eval   - 3  (add 1 3) 2', () => {   
-        let flourishParser = new Parser();  
-        let tree = flourishParser.parse("- 3  (add 1 3) 2\n");      
-        assert.equal(evaluate(tree.children[0].children[0],env.create()),-3)
-    });
+  
 
     it('should eval set  - 3  (add 1 3) 2', () => {   
         let environment = env.create();
@@ -47,13 +30,25 @@ describe("Eval", () => {
     });
 
 
+    it('should not fail setting same variable 2nd time on sub environment ', () => {   
+        let flourishParser = new Parser();  
+        let environment = env.create();
+        let tree = flourishParser.parse("set a  (add 1 3)\n");      
+        evaluate(tree.children[0].children[0],environment);
+
+        let subEnvironment = env.create(environment);
+        tree = flourishParser.parse("set a  (add a 34)\n");      
+
+        assert.equal(evaluate(tree.children[0].children[0],subEnvironment),38);
+
+    });
+
+
+
     it('should set result last val', () => {   
         let environment = env.create();
-
         let flourishParser = new Parser();  
-
         let tree = flourishParser.parse("(set b  4)\n");      
-
         assert.equal(evaluate(tree.children[0].children[0],environment),4);
 
     });

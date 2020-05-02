@@ -18,6 +18,19 @@ describe("builtIn", () => {
         assert.equal(evaluate(tree.children[0].children[0],environment.create()),-1)
     });
 
+    it('should eval add  (+2 1) 2', () => {   
+        let flourishParser = new Parser();  
+        let tree = flourishParser.parse("add  (+2 1) 2\n");      
+        assert.equal(evaluate(tree.children[0].children[0],environment.create()),5)
+    });
+
+
+    it('should eval   - 3  (add 1 3) 2', () => {   
+        let flourishParser = new Parser();  
+        let tree = flourishParser.parse("- 3  (add 1 3) 2\n");      
+        assert.equal(evaluate(tree.children[0].children[0],environment.create()),-3)
+    });
+
 
     
 });
