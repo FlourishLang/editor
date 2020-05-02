@@ -48,7 +48,7 @@ describe("Eval", () => {
     it('should set result last val', () => {   
         let environment = env.create();
         let flourishParser = new Parser();  
-        let tree = flourishParser.parse("(set b  4)\n");      
+        let tree = flourishParser.parse("set b  4\n");      
         assert.equal(evaluate(tree.children[0].children[0],environment),4);
 
     });

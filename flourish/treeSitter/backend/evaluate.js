@@ -35,7 +35,10 @@ let specialEnv = {
 
 
 
-function evaluate(ast,env) {
+function evaluate(ast, env) {
+    if (ast.isMissingNode) {
+        return new ERROR("Syntax error Missing "+ast.type);
+    }
     switch (ast.type) {
         case "expression":
             {
@@ -70,6 +73,10 @@ function evaluate(ast,env) {
 
         case "number":
             return parseInt(ast.leafText);
+
+        case "ERROR":
+            return new ERROR("Syntax error");
+
 
 
         default:

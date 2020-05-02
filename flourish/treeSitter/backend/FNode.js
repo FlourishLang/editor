@@ -6,6 +6,7 @@ class FNode   {
     constructor(newTsTree) {
         this.children = [];
         this.leafText = "";
+        this.isMissingNode = false;
         this.apply(newTsTree);
 
     }
@@ -13,8 +14,10 @@ class FNode   {
 
     apply(newTsTree) {
         let data = { startPosition: newTsTree.startPosition, type: newTsTree.type, endPosition: newTsTree.endPosition };
+        this.isMissingNode = newTsTree.isMissing()
         if (newTsTree.childCount == 0)
             this.leafText = newTsTree.text;
+
         Object.assign(this, data);
     }
 
@@ -55,7 +58,7 @@ function isEqualNode(first, next, fNode) {
         return false;
     }
 
-    if (first.childCount == 0 && next.text == fNode.leafText) {
+    if (first.childCount == 0 && next.text == fNode.leafText && this.isMissingNode == next.isMissing()) {
         return true;
     }
 

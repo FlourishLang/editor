@@ -12,6 +12,13 @@ describe("builtIn", () => {
         assert.equal(evaluate(tree.children[0].children[0],environment.create()),3)
     });
 
+    it('should return error while trying to add undefined', () => {   
+        let flourishParser = new Parser();  
+        let tree = flourishParser.parse("add  a 2\n");   
+        assert.equal(evaluate(tree.children[0].children[0],environment.create()).constructor.name,"ERROR")
+    });
+
+
     it('should have subtract add', () => {   
         let flourishParser = new Parser();  
         let tree = flourishParser.parse("subtract  1 2\n");      
