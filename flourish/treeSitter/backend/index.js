@@ -6,21 +6,29 @@ const evaluate = require('./evaluate')
 const envCreate = require('./environment').create;
 
 function patchTree(tree, env) {
+    let errors = [];
     tree.children = tree.children.map(mayBeStatement => {
         if (mayBeStatement.type == 'statement') {
             try {
-                let result = evaluate(mayBeStatement.children[0], env);
-                if (result && result.constructor.name == 'ERROR') {
-                    mayBeStatement.type = "ERROR";
+                let error = evaluate(mayBeStatement.children[0], env);
+                if (error && error.constructor === evaluate.ERROR) {
+                    if (!error.startPosition) {
+                        error.startPosition = mayBeStatement.startPosition;
+                        error.endPosition = mayBeStatement.endPosition;
+                    }
+                    errors.push(error);
                 }
             } catch (error) {
-                console.log("Unhandled error in eval",error);
-                mayBeStatement.type = "ERROR";
+                console.log("Unhandled error in eval", error);
+                errors.push(evaluate.ERROR.fromAst(mayBeStatement, `Unhandled error in eval ${error}`));
             }
 
+        } else if (mayBeStatement.type == 'ERROR') {
+            errors.push(evaluate.ERROR.fromAst(mayBeStatement, ''));
         }
         return mayBeStatement;
     });
+    tree.errors = errors;
     return tree;
 }
 

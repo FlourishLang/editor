@@ -14,18 +14,6 @@
 
 
 
-  CodeMirror.registerHelper("lint", "flourish", function(text, options) {
-    var found=[];
-      found.push({
-        from: CodeMirror.Pos(0, 0),
-        to: CodeMirror.Pos(0, 20),
-        message: "Successfully showing error message",
-        severity : "error"
-      });
-    return found;
-  });
-  
-
 
 
 
@@ -100,9 +88,12 @@
 
 
 
+
+
+
   CodeMirror.defineMode("flourish", function () {
 
-    return {
+    let flourishMode = {
 
       token: function (stream, state) {
 
@@ -140,8 +131,27 @@
       closeBrackets: { pairs: "()[]{}\"\"" },
       lineComment: ";;",
       blockCommentStart: "#|",
-      blockCommentEnd: "|#"
+      blockCommentEnd: "|#",
+
+      lintProvider: function (text, options) {
+        if(!this.treeSitterTree)
+          return [];
+
+        return this.treeSitterTree.errors.map(e=>({
+          from: CodeMirror.Pos(e.startPosition.row, e.startPosition.column),
+          to: CodeMirror.Pos(e.endPosition.row, e.endPosition.column),
+          message: e.message,
+          severity: "error"
+        }))
+        
+      }
+
+
     };
+
+    CodeMirror.registerHelper("lint", "flourish",flourishMode.lintProvider.bind(flourishMode))
+    return flourishMode;
+
   });
 
   CodeMirror.defineMIME("text/x-flourish", "flourish");

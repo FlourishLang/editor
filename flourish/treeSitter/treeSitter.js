@@ -60,7 +60,8 @@
     state.socket.on('connect', function () {
       state.socket.emit('parse', cm.getValue())
       state.socket.on('parseComplete', function (treeInfo) {
-        // console.log(treeInfo);
+        
+
         if(editmark){
           editmark.clear();
           editmark = null;
@@ -102,9 +103,11 @@
         }
 
         if (cm.getMode().hasOwnProperty("treeSitterTree"))
-          cm.getMode().treeSitterTree = treeInfo;
+
         cm.operation(function () {
           cm.getMode().treeSitterTree = treeInfo;
+          cm.performLint();
+
           if (treeInfo.changes) {
 
             let finalrange = calculateFullRange(treeInfo.changes.changedRange, treeInfo.changes.editedRange);

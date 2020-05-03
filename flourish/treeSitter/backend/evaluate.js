@@ -1,7 +1,13 @@
 
-class ERROR {
-    constructor(message) {
+ class ERROR {
+    constructor(message, startPosition, endPosition) {
         this.message = message;
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+    }
+
+    static fromAst(ast, message) {
+        return new ERROR(message, ast.startPosition, ast.endPosition);
     }
 }
 
@@ -9,15 +15,23 @@ let specialEnv = {
 
     'set': function (args, env) {
 
-        if (args.length != 2)
-            return new ERROR(`Mismatching no of argument for set: ${args.length}`)
+        if (args.length != 2) {
+            if (args.length) {
+                return new ERROR(`Mismatching no of argument for set: ${args.length}`,
+                    args.children[0].startPosition, args.children[args.children.length - 1].endPosition);
+            } else {
+                return new ERROR(`Mismatching no of argument for set: ${args.length}`)
+            }
+        }
+
+
 
         let identifier = args[0].children[0].leafText
         if (env[identifier] == undefined) {
             env[identifier] = evaluate(args[1], env);
             return env[identifier];
         } else {
-            return new ERROR(`Can't reset identifier: ${identifier}`)
+            return ERROR.fromAst(args[0].children[0], `Can't reset identifier: ${identifier}`);
         }
 
     },
@@ -26,7 +40,8 @@ let specialEnv = {
         if (env[identifier] == undefined) {
             if (env.super)
                 return get(arg, env.super);
-            return new ERROR(`Can't find identifier: ${identifier}`);
+            return ERROR.fromAst(args[0].children[0], `Can't find identifier: ${identifier}`);
+
         } else {
             return env[identifier];
         }
@@ -39,9 +54,28 @@ let specialEnv = {
 
 
 function evaluate(ast, env) {
+
     if (ast.hasError) {
-        return new ERROR("Syntax error Missing " + ast.type);
+        function subject(ast) {
+            if (ast.type === ast.leafText) {
+                return ast.leafText;
+            } else {
+                return `${ast.type}(${ast.leafText})`
+            }
+        }
+        let error = ast.children.find(i => i.isMissingNode || i.type === "ERROR");
+        if (error) {
+            if (error.isMissingNode) {
+                return new ERROR(`Syntax error missing ${subject(ast)}`, ast.startPosition, ast.endPosition);
+            } else {
+                return new ERROR(`Syntax error unexpected ${subject(ast)}`, ast.startPosition, ast.endPosition);
+            }
+        }
     }
+
+
+
+
     switch (ast.type) {
         case "expression":
             {
@@ -78,7 +112,7 @@ function evaluate(ast, env) {
             return parseInt(ast.leafText);
 
         case "ERROR":
-            return new ERROR("Syntax error");
+            return ERROR.fromAst(ast, "Syntax error");
 
 
 
@@ -88,4 +122,5 @@ function evaluate(ast, env) {
     }
 }
 
+evaluate.ERROR = ERROR;
 module.exports = evaluate;
