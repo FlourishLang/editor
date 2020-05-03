@@ -1,5 +1,5 @@
 
- class ERROR {
+class ERROR {
     constructor(message, startPosition, endPosition) {
         this.message = message;
         this.startPosition = startPosition;
@@ -57,7 +57,9 @@ function evaluate(ast, env) {
 
     if (ast.hasError) {
         function subject(ast) {
-            if (ast.type === ast.leafText) {
+            if ("" === ast.leafText) {
+                return ast.type;
+            } else if (ast.type === ast.leafText) {
                 return ast.leafText;
             } else {
                 return `${ast.type}(${ast.leafText})`
@@ -66,9 +68,9 @@ function evaluate(ast, env) {
         let error = ast.children.find(i => i.isMissingNode || i.type === "ERROR");
         if (error) {
             if (error.isMissingNode) {
-                return new ERROR(`Syntax error missing ${subject(ast)}`, ast.startPosition, ast.endPosition);
+                return new ERROR(`Syntax error missing ${subject(error)}`, error.startPosition, error.endPosition);
             } else {
-                return new ERROR(`Syntax error unexpected ${subject(ast)}`, ast.startPosition, ast.endPosition);
+                return new ERROR(`Syntax error unexpected ${subject(error)}`, error.startPosition, error.endPosition);
             }
         }
     }
