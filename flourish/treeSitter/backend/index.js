@@ -30,7 +30,7 @@ function patchTree(tree, env) {
             }
 
         } else if (mayBeStatement.type == 'ERROR') {
-            errors.push(evaluate.ERROR.fromAst(mayBeStatement, ''));
+            errors.push(evaluate.ERROR.fromAst(mayBeStatement, 'Statement expected'));
         }
         return mayBeStatement;
     });

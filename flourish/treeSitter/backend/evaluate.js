@@ -17,16 +17,20 @@ let specialEnv = {
 
         if (args.length != 2) {
             if (args.length) {
-                return new ERROR(`Mismatching no of argument for set: ${args.length}`,
-                    args.children[0].startPosition, args.children[args.children.length - 1].endPosition);
+                return new ERROR(`Mismatching no of argument for set(${args.length}) expected 2`,
+                    args[0].startPosition, args[args.length - 1].endPosition);
             } else {
-                return new ERROR(`Mismatching no of argument for set: ${args.length}`)
+                return new ERROR(`Mismatching no of argument for set(${args.length}) expected 2`)
             }
         }
 
 
 
-        let identifier = args[0].children[0].leafText
+        let identifier = args[0].children[0].leafText;
+        if (args[0].children[0].type !== "identifier") {
+            return ERROR.fromAst(args[0].children[0], `identifier expected found ${args[0].children[0].type}`);
+        }
+
         if (env[identifier] == undefined) {
             env[identifier] = evaluate(args[1], env);
             return env[identifier];
@@ -40,7 +44,7 @@ let specialEnv = {
         if (env[identifier] == undefined) {
             if (env.super)
                 return get(arg, env.super);
-            return ERROR.fromAst(args[0].children[0], `Can't find identifier: ${identifier}`);
+            return ERROR.fromAst(arg, `Can't find identifier: ${identifier}`);
 
         } else {
             return env[identifier];
@@ -57,7 +61,9 @@ function evaluate(ast, env) {
 
     if (ast.hasError) {
         function subject(ast) {
-            if ("" === ast.leafText) {
+            if (ast.type == "ERROR") {
+                return ast.children[0].leafText;
+            } else if ("" === ast.leafText) {
                 return ast.type;
             } else if (ast.type === ast.leafText) {
                 return ast.leafText;
