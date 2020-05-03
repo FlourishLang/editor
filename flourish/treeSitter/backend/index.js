@@ -16,6 +16,12 @@ function patchTree(tree, env) {
                         error.startPosition = mayBeStatement.startPosition;
                         error.endPosition = mayBeStatement.endPosition;
                     }
+                    
+                    if (error.startPosition.line == error.endPosition.line 
+                        && error.startPosition.column == error.endPosition.column) {
+                        error.startPosition.column -=1;
+                    }
+
                     errors.push(error);
                 }
             } catch (error) {
