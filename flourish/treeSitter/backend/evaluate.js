@@ -32,8 +32,17 @@ let specialEnv = {
         }
 
         if (env[identifier] == undefined) {
-            env[identifier] = evaluate(args[1], env);
-            return env[identifier];
+        {
+            let res = evaluate(args[1], env);
+            if (res instanceof evaluate.ERROR) {
+                return res;
+            }else{
+                env[identifier] = res;          
+            }
+            
+            return env[identifier];            
+        }
+            
         } else {
             return ERROR.fromAst(args[0].children[0], `Can't reset identifier: ${identifier}`);
         }
@@ -58,7 +67,6 @@ let specialEnv = {
 
 
 function evaluate(ast, env) {
-
     if (ast.hasError) {
         function subject(ast) {
             if (ast.type == "ERROR") {

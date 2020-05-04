@@ -28,6 +28,13 @@ class FNode   {
         this.children.forEach((child, index) => { child.applyTree(newTsTree.children[index]) });
     }
 
+    getText(){
+        if(this.leafText)
+            return this.leafText;
+        else   
+            return this.children.map(i=>i.getText()).join('');
+    }
+
     
 
 };
