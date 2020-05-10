@@ -12,11 +12,14 @@
 
     CodeMirror.defineOption("anyKeyCompletion", false, function (cm, val, old) {
 
+        cm.on("inputRead", function (cm, changeObj) {
+            if (cm.state.completionActive) {
+                return;
+            }
+            CodeMirror.commands.autocomplete(cm);
+        })
 
-        if (cm.state.completionActive) {
-            return;
-        }
-        CodeMirror.commands.autocomplete(cm);
+
 
     })
 

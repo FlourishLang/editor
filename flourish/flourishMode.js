@@ -87,13 +87,39 @@
   }
 
 
-function flourishHint(cm) {
-  var cur = cm.getCursor(), token = cm.getTokenAt(cur);
-  var start = token.start, end = cur.ch, word = token.string.slice(0, end - start);
+
+
+  
+function flourishHint(codemirror,options) {
+
+  const cursor = codemirror.getCursor()
+      const token = codemirror.getTokenAt(cursor)
+      const start = token.start
+      const end = cursor.ch
+      const line = cursor.line
+      // const currentWord= token.string
+      let lineContent = codemirror.getDoc().getLine(line);
+      
+
+      
+      if(lineContent.endsWith("if")){
+        let data = {
+          list: ["if (> 1 2):\n\nend\n"],
+          from: CodeMirror.Pos(line, 0),
+          to: CodeMirror.Pos(line, lineContent.length)
+        };
+
+        CodeMirror.on(data,"pick",function(){
+          codemirror.setCursor({line: line+1, ch: 0})
+
+        });
+        return data;
+      }
+
    return {
-    list: ["if "],
-    from: CodeMirror.Pos(cur.line, start),
-    to: CodeMirror.Pos(cur.line, end)
+    list: [],
+    from: CodeMirror.Pos(line, start),
+    to: CodeMirror.Pos(line, end)
   };
 }
 
