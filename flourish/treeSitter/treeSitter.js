@@ -10,10 +10,7 @@
     mod(CodeMirror);
 })(function (CodeMirror) {
   "use strict";
-  if (!window.io) {
-    console.error("Unable to get socket.io, failing");
-    return;
-  }
+  
 
 
 
@@ -46,6 +43,11 @@
 
 
   function startTreeSitterParsing(cm) {
+    if (!window.io) {
+      console.error("Unable to get socket.io, failing");
+      return;
+    }
+    
     var state = cm.state.treeSitterParse, options = state.options;
 
     window.onbeforeunload = ()=>{

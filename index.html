@@ -8,13 +8,19 @@
 <link rel=stylesheet href="theme/material.css">
 
 
+
 <script src="lib/codemirror.js"></script>
+
+<link rel="stylesheet" href="addon/hint/show-hint.css">
+<script src="addon/hint/show-hint.js"></script>
+
 <script src="addon/edit/matchbrackets.js"></script>
 <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 <script src="addon/selection/active-line.js"></script>
 <script src="flourish/flourishMode.js"></script>
 <script src="flourish/treeSitter/treeSitter.js"></script>
 <script src="addon/lint/lint.js"></script>
+<script src="flourish/anykeyComplete.js"></script>
 <link rel="stylesheet" href="addon/lint/lint.css">
 
 
@@ -53,6 +59,7 @@ defun (max (x 200) (y 455))
       matchBrackets: true,
       //  theme:"material",
       // treeSitter: true,
+      anyKeyCompletion:true,
       lint:{ lintOnChange: false },
       styleActiveLine: true,
       gutters: ["CodeMirror-lint-markers"],

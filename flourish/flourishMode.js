@@ -87,7 +87,15 @@
   }
 
 
-
+function flourishHint(cm) {
+  var cur = cm.getCursor(), token = cm.getTokenAt(cur);
+  var start = token.start, end = cur.ch, word = token.string.slice(0, end - start);
+   return {
+    list: ["if "],
+    from: CodeMirror.Pos(cur.line, start),
+    to: CodeMirror.Pos(cur.line, end)
+  };
+}
 
 
 
@@ -150,10 +158,14 @@
     };
 
     CodeMirror.registerHelper("lint", "flourish",flourishMode.lintProvider.bind(flourishMode))
+    CodeMirror.registerHelper("hint", "flourish", flourishHint);
+
     return flourishMode;
 
   });
 
   CodeMirror.defineMIME("text/x-flourish", "flourish");
+
+
 
 });

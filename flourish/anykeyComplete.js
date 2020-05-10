@@ -13,10 +13,10 @@
     CodeMirror.defineOption("anyKeyCompletion", false, function (cm, val, old) {
 
 
-        if (instance.state.completionActive) {
+        if (cm.state.completionActive) {
             return;
         }
-        CodeMirror.commands.autocomplete(instance);
+        CodeMirror.commands.autocomplete(cm);
 
     })
 
