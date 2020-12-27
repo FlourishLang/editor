@@ -104,7 +104,7 @@ function flourishHint(codemirror,options) {
       
       if(lineContent.endsWith("if")){
         let data = {
-          list: ["if (> 1 2):\n\nend\n"],
+          list: ["if condition:\n\nend\n"],
           from: CodeMirror.Pos(line, 0),
           to: CodeMirror.Pos(line, lineContent.length)
         };
