@@ -39,11 +39,11 @@
 </style>
 
   <form style="position: relative; margin-top: .5em;"><textarea id=demotext>
-print (innerarge sd ) 
-set a (+ err sdas)
+print [innerarge sd ] 
+set a [+ err sdas]
 print asdasd (+ asdas)
-defun (max x y)
-defun (max (x 200) (y 455))
+defun [max x y]
+defun [max [x 200] [y 455]]
   </textarea>
   <script>
     var content = localStorage.getItem("edtordata"); 
@@ -58,7 +58,7 @@ defun (max (x 200) (y 455))
       mode: 'text/x-flourish',
       matchBrackets: true,
       //  theme:"material",
-      // treeSitter: true,
+      treeSitter: true,
       anyKeyCompletion:true,
       lint:{ lintOnChange: false },
       styleActiveLine: true,
