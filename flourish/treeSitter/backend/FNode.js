@@ -68,7 +68,7 @@ function isEqualNode(first, next, fNode) {
         return false;
     }
 
-    if (first.childCount == 0 && next.text == fNode.leafText && this.isMissingNode == next.isMissing()) {
+    if (first.childCount == 0 && next.text == fNode.leafText && !this.isMissingNode == !next.isMissing()) {
         return true;
     }
 
