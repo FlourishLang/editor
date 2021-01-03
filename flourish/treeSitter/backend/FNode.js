@@ -8,6 +8,7 @@ class FNode   {
         this.leafText = "";
         this.isMissingNode = false;
         this.hasError = false;
+        this.isMutated = true;
         this.apply(newTsTree);
 
     }
@@ -98,11 +99,12 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
 
     } else if (isEqualNodeMemory(oldTsTree, newTsTree, oldFNodeTree)) {
         // console.log("reusing", oldFNodeTree.type, newTsTree.text);
+        oldFNodeTree.isMutated = false;
         oldFNodeTree.applyTree(newTsTree);
         return oldFNodeTree;
 
     } else if (oldFNodeTree.type == newTsTree.type) {
-
+        oldFNodeTree.isMutated = true;//Childrens changed
         oldFNodeTree.apply(newTsTree);
         let indexOffSet = 0;
         for (let index = 0; index < newTsTree.childCount; index++) {
