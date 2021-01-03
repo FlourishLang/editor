@@ -169,7 +169,7 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
         return oldFNodeTree;
     } else {
 
-        return null;
+        return reConciliationNode(oldFNodeTree, null, newTsTree) ;
     }
 
 }
