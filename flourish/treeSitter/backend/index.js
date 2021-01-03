@@ -2,8 +2,19 @@
 const server = require('http').createServer();
 const io = require('socket.io')(server);
 const Parser = require('./Parser')
-const evaluate = require('./evaluate')
+// const evaluate = require('./evaluate')
 const envCreate = require('./environment').create;
+
+const evaluate = function name(ast,env) {
+    if(!ast.isMutated)
+        console.log("Mutated",ast.leafText)
+    if(ast.children && ast.children.length){
+        ast.children.forEach(element => {
+            evaluate(element,env);
+        });
+    }
+}
+
 
 function patchTree(tree, env) {
     let errors = [];
