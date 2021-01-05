@@ -169,7 +169,8 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
         return oldFNodeTree;
     } else {
 
-        return reConciliationNode(oldFNodeTree, null, newTsTree) ;
+        return null;
+
     }
 
 }
@@ -178,10 +179,19 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
 
 FNode.reConciliation = function (oldFNodeTree, oldTsTree, newTsTree) {
     mapMemorization.clear();
-    return reConciliationNode(
+    let node = reConciliationNode(
         oldFNodeTree,
         oldTsTree ? oldTsTree.rootNode : null,
-        newTsTree.rootNode)
+        newTsTree.rootNode);
+    if (node == null)
+        return reConciliationNode(
+            oldFNodeTree,
+            null,
+            newTsTree.rootNode);
+    else
+        return node;
+
+
 }
 
 
