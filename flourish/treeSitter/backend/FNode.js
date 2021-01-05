@@ -1,7 +1,7 @@
 
 
 
-class FNode   {
+class FNode {
 
     constructor(newTsTree) {
         this.children = [];
@@ -29,14 +29,14 @@ class FNode   {
         this.children.forEach((child, index) => { child.applyTree(newTsTree.children[index]) });
     }
 
-    getText(){
-        if(this.leafText)
+    getText() {
+        if (this.leafText)
             return this.leafText;
-        else   
-            return this.children.map(i=>i.getText()).join('');
+        else
+            return this.children.map(i => i.getText()).join('');
     }
 
-    
+
 
 };
 
@@ -176,9 +176,20 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
 }
 
 
+function clearNonMutation(fNode) {
+    if(!fNode)
+        return;
+    fNode.isMutated = false;
+    if(fNode.children)
+        fNode.children.forEach(element => clearNonMutation(element));
+}
+
+
 
 FNode.reConciliation = function (oldFNodeTree, oldTsTree, newTsTree) {
     mapMemorization.clear();
+    clearNonMutation(oldFNodeTree);
+
     let node = reConciliationNode(
         oldFNodeTree,
         oldTsTree ? oldTsTree.rootNode : null,
