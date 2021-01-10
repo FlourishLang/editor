@@ -1,6 +1,6 @@
 const Parser = require('tree-sitter');
 const Flourish = require('tree-sitter-flourish');
-
+const leastCommonAncestorFunctionGenerator = require("least-common-ancestor");
 
 const FNode = require('./FNode.js');
 
@@ -14,6 +14,7 @@ const FNode = require('./FNode.js');
         this.tsTree = null;
         this.fNodeTree = null;
         this.parser = parser;
+        this.lca = null;
     
     }
 
@@ -21,6 +22,8 @@ const FNode = require('./FNode.js');
     {
         this.tsTree = this.parser.parse(sourceCode);
         this.fNodeTree = FNode.reConciliation(this.fNodeTree, null, this.tsTree);
+        this.leastCommonAncesestor = leastCommonAncestorFunctionGenerator(this.fNodeTree,node=>node.children);
+    
         return this.fNodeTree;
     }
 
