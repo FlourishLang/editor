@@ -23,5 +23,11 @@ module.exports = Executer;
 
 
 let executorFunction = function * executorFunction(tree) {
+
+    //Run build loop
+    while (true) {
+        
+        yield "Nothing"
+    }
     
 }
