@@ -6,11 +6,13 @@ class Executer{
 
     constructor(intree){
         this.tree = intree;
+        this.executor = executorFunction(this.tree);
 
     }
 
 
-    execute(){
+    execute(state){
+        return this.executor.next(state);
     }
 
 
@@ -18,3 +20,8 @@ class Executer{
 }
 
 module.exports = Executer;
+
+
+let executorFunction = function * executorFunction(tree) {
+    
+}
