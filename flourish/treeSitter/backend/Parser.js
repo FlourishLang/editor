@@ -38,6 +38,7 @@ const FNode = require('./FNode.js');
         let editedRange = tree.getEditedRange()
         this.fNodeTree = FNode.reConciliation(this.fNodeTree, tree, newTree)
 
+        this.leastCommonAncesestor.rebuild();
         const changes = { changedRange, editedRange };
         this.tsTree = newTree;
         return [this.fNodeTree,changes];
