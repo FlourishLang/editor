@@ -123,6 +123,8 @@ function evaluate(ast, env) {
             return specialEnv["get"].call(this, { leafText: "add" }, env);
         case "-":
             return specialEnv["get"].call(this, { leafText: "subtract" }, env);
+        case "=":
+            return specialEnv["get"].call(this, { leafText: "equals" }, env);
 
         case "number":
             return parseInt(ast.leafText);

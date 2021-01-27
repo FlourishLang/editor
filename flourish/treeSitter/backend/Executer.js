@@ -21,9 +21,35 @@ class Executer {
 
 module.exports = Executer;
 
-let ifExecutorFunction = function* ifExecutorFunction(tree) {
+let ifExecutorFunction = function* ifExecutorFunction(tree,environment) {
+    let expressionNode = tree.children[0].children[0].children[1];
+    if((evaluate(expressionNode, environment)!=false)){
+        
+        let ifbody = tree.children[0].children[0];
+        for (let index = 3; index < ifbody.children.length; index++) {
+            const mayBeStatement = ifbody.children[index];
+            if (mayBeStatement.type == 'statement') {
+                let result = null;
+                try {
+                    result = evaluate(mayBeStatement.children[0], environment);
+                } catch (error) {
 
-    yield "Nothing";
+                    if(error === "Cannot evaluate:ifStatement"){
+                        yield* ifExecutorFunction(mayBeStatement,environment);
+                    }
+                    
+                }
+
+                if (result && result.constructor === evaluate.ERROR) {
+                    throw (result);
+                }
+            } else if(mayBeStatement.type!="emptylines"){
+                throw (mayBeStatement);
+            }
+            
+        }
+    }
+    
 
 }
 
@@ -41,7 +67,7 @@ let executorFunction = function* executorFunction(tree) {
                 } catch (error) {
 
                     if(error === "Cannot evaluate:ifStatement"){
-                        yield* ifExecutorFunction(mayBeStatement);
+                        yield* ifExecutorFunction(mayBeStatement,environment);
                     }
                     
                 }

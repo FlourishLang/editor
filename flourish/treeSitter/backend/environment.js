@@ -29,6 +29,9 @@ module.exports.builtInEnv = {
     'subtract': createMethod(function () {
         return Array.from(arguments).reduce((p, c) => p - c)
     }),
+    'equals': createMethod(function () {
+        return Array.from(arguments).reduce((p, c) => p == c?p:false)
+    }),
 
 };
 
