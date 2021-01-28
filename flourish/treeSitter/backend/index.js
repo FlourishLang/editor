@@ -22,9 +22,16 @@ function patchTree(tree, env) {
     return tree;
 }
 
-
+let hasconnection =false;
 
 io.on('connection', socket => {
+
+    //For debugging purpose we have only one connection active at a time
+    if(hasconnection)
+        socket.disconnect(true);
+    else     
+        hasconnection =true;
+
 
 
     let parser = null;

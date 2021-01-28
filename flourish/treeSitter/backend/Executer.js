@@ -21,35 +21,50 @@ class Executer {
 
 module.exports = Executer;
 
-let ifExecutorFunction = function* ifExecutorFunction(tree,environment) {
+let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
     let expressionNode = tree.children[0].children[0].children[1];
-    if((evaluate(expressionNode, environment)!=false)){
-        
-        let ifbody = tree.children[0].children[0];
-        for (let index = 3; index < ifbody.children.length; index++) {
-            const mayBeStatement = ifbody.children[index];
-            if (mayBeStatement.type == 'statement') {
-                let result = null;
-                try {
-                    result = evaluate(mayBeStatement.children[0], environment);
-                } catch (error) {
+    if ((evaluate(expressionNode, environment) != false)) {
+        let gotAnError = false;
+        do {
+            gotAnError = false;
+            let localEnvironment = envCreate(environment); //Every new try creates a new enviornment
+            try {
+                let ifbody = tree.children[0].children[0];
+                for (let index = 3; index < ifbody.children.length; index++) {
+                    const mayBeStatement = ifbody.children[index];
+                    if (mayBeStatement.type == 'statement') {
+                        let result = null;
+                        try {
+                            result = evaluate(mayBeStatement.children[0], localEnvironment);
+                        } catch (error) {
 
-                    if(error === "Cannot evaluate:ifStatement"){
-                        yield* ifExecutorFunction(mayBeStatement,environment);
+                            if (error === "Cannot evaluate:ifStatement") {
+                                yield* ifExecutorFunction(mayBeStatement, localEnvironment);
+                            }
+
+                        }
+
+                        if (result && result.constructor === evaluate.ERROR) {
+                            throw (result);
+                        }
+                    } else if (mayBeStatement.type != "emptylines") {
+                        throw (mayBeStatement);
                     }
-                    
+
                 }
 
-                if (result && result.constructor === evaluate.ERROR) {
-                    throw (result);
-                }
-            } else if(mayBeStatement.type!="emptylines"){
-                throw (mayBeStatement);
+            } catch (error) {
+                gotAnError =true;
+                console.log(error);
+                yield error;
             }
-            
-        }
+
+
+        } while (gotAnError);
+
+
     }
-    
+
 
 }
 
@@ -66,19 +81,19 @@ let executorFunction = function* executorFunction(tree) {
                     result = evaluate(mayBeStatement.children[0], environment);
                 } catch (error) {
 
-                    if(error === "Cannot evaluate:ifStatement"){
-                        yield* ifExecutorFunction(mayBeStatement,environment);
+                    if (error === "Cannot evaluate:ifStatement") {
+                        yield* ifExecutorFunction(mayBeStatement, environment);
                     }
-                    
+
                 }
 
                 if (result && result.constructor === evaluate.ERROR) {
                     throw (result);
                 }
-            } else if(mayBeStatement.type!="emptylines"){
+            } else if (mayBeStatement.type != "emptylines") {
                 throw (mayBeStatement);
             }
-            
+
         }
 
 
