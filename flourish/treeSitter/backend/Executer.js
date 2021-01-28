@@ -21,6 +21,31 @@ class Executer {
 
 module.exports = Executer;
 
+
+function patchError(error, type) {
+    switch (type) {
+        case "returnError":
+            {
+                if (!error.startPosition) {
+                    error.startPosition = mayBeStatement.startPosition;
+                    error.endPosition = mayBeStatement.endPosition;
+                }
+
+                if (error.startPosition.line == error.endPosition.line
+                    && error.startPosition.column == error.endPosition.column) {
+                    error.startPosition.column -= 1;
+                }
+            }
+            return error;
+        case "catchError":
+
+            return evaluate.ERROR.fromAst(mayBeStatement, `Unhandled error in eval ${error}`);
+
+        case "statementError":
+            return evaluate.ERROR.fromAst(mayBeStatement, 'Statement expected')
+    }
+}
+
 let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
     let expressionNode = tree.children[0].children[0].children[1];
     if ((evaluate(expressionNode, environment) != false)) {
@@ -40,21 +65,23 @@ let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
 
                             if (error === "Cannot evaluate:ifStatement") {
                                 yield* ifExecutorFunction(mayBeStatement, localEnvironment);
+                            } else {
+                                throw patchError(error,"catchError");
                             }
 
                         }
 
                         if (result && result.constructor === evaluate.ERROR) {
-                            throw (result);
+                            throw patchError(result,"returnError");
                         }
                     } else if (mayBeStatement.type != "emptylines") {
-                        throw (mayBeStatement);
+                        throw patchError(mayBeStatement,"statementError");
                     }
 
                 }
 
             } catch (error) {
-                gotAnError =true;
+                gotAnError = true;
                 console.log(error);
                 yield error;
             }

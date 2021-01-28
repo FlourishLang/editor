@@ -16,8 +16,11 @@ const Parser = require('./Parser')
 // }
 
 /**Patch tree for consumption of codemirror  */
-function patchTree(tree, env) {
+function patchTree(tree, result) {
+
     let errors = [];
+    if (result.done == false)
+        errors.push(result.value);
     tree.errors = errors;
     return tree;
 }
