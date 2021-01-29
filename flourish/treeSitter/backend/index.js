@@ -50,13 +50,17 @@ io.on('connection', socket => {
         socket.emit('parseComplete', outTree);
     });
 
+    let lastResult = null; //TODO:Redesign
     socket.on('parseIncremental', data => {
         const newSourceCode = data.newtext;
         let [tree, changes] = parser.parseIncremental(newSourceCode, data.posInfo)
+        if(lastResult && lastResult.done ==true)
+            executer.reset();
         let result = executer.execute()
         tree = patchTree(tree, result);
         tree.changes = changes;
         socket.emit('parseComplete', tree);
+        lastResult = result;
 
     });
 

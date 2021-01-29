@@ -6,13 +6,17 @@ class Executer {
 
     constructor(intree) {
         this.tree = intree;
-        this.executor = executorFunction(this.tree);
-
+        this.reset();
     }
 
 
     execute(state) {
         return this.executor.next(state);
+    }
+
+    reset(){
+        this.executor = executorFunction(this.tree);
+
     }
 
 
