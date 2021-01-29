@@ -70,16 +70,16 @@ let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
                             if (error === "Cannot evaluate:ifStatement") {
                                 yield* ifExecutorFunction(mayBeStatement, localEnvironment);
                             } else {
-                                throw patchError(error,"catchError");
+                                throw patchError(error, "catchError");
                             }
 
                         }
 
                         if (result && result.constructor === evaluate.ERROR) {
-                            throw patchError(result,"returnError");
+                            throw patchError(result, "returnError");
                         }
                     } else if (mayBeStatement.type != "emptylines") {
-                        throw patchError(mayBeStatement,"statementError");
+                        throw patchError(mayBeStatement, "statementError");
                     }
 
                 }
@@ -130,35 +130,3 @@ let executorFunction = function* executorFunction(tree) {
 
 }
 
-
-/*
-
- tree.children = map(mayBeStatement => {
-            if (mayBeStatement.type == 'statement') {
-                try {
-                    let error = evaluate(mayBeStatement.children[0], env);
-                    if (error && error.constructor === evaluate.ERROR) {
-                        if (!error.startPosition) {
-                            error.startPosition = mayBeStatement.startPosition;
-                            error.endPosition = mayBeStatement.endPosition;
-                        }
-
-                        if (error.startPosition.line == error.endPosition.line
-                            && error.startPosition.column == error.endPosition.column) {
-                            error.startPosition.column -=1;
-                        }
-
-                        errors.push(error);
-                    }
-                } catch (error) {
-                    console.log("Unhandled error in eval", error);
-                    errors.push(evaluate.ERROR.fromAst(mayBeStatement, `Unhandled error in eval ${error}`));
-                }
-
-            } else if (mayBeStatement.type == 'ERROR') {
-                errors.push(evaluate.ERROR.fromAst(mayBeStatement, 'Statement expected'));
-            }
-            return mayBeStatement;
-        });
-
-*/
