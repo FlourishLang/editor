@@ -50,49 +50,58 @@ function patchError(error, type) {
     }
 }
 
+
+
+let statementBlockExecutor = function* statementBlockExecutor(body, environment, startStatement) {
+    let gotAnError = false;
+    do {
+        gotAnError = false;
+        let localEnvironment = envCreate(environment); //Every new try creates a new enviornment
+        try {
+            for (let index = startStatement; index < body.children.length; index++) {
+                const mayBeStatement = body.children[index];
+                if (mayBeStatement.type == 'statement') {
+                    let result = null;
+                    try {
+                        result = evaluate(mayBeStatement.children[0], localEnvironment);
+                    } catch (error) {
+
+                        if (error === "Cannot evaluate:ifStatement") {
+                            yield* ifExecutorFunction(mayBeStatement, localEnvironment);
+                        } else {
+                            throw patchError(error, "catchError");
+                        }
+
+                    }
+
+                    if (result && result.constructor === evaluate.ERROR) {
+                        throw patchError(result, "returnError");
+                    }
+                } else if (mayBeStatement.type != "emptylines") {
+                    throw patchError(mayBeStatement, "statementError");
+                }
+
+            }
+
+        } catch (error) {
+            gotAnError = true;
+            console.log(error);
+            yield error;
+        }
+
+
+    } while (gotAnError);
+
+
+}
+
+
+
 let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
     let expressionNode = tree.children[0].children[0].children[1];
     if ((evaluate(expressionNode, environment) != false)) {
-        let gotAnError = false;
-        do {
-            gotAnError = false;
-            let localEnvironment = envCreate(environment); //Every new try creates a new enviornment
-            try {
-                let ifbody = tree.children[0].children[0];
-                for (let index = 3; index < ifbody.children.length; index++) {
-                    const mayBeStatement = ifbody.children[index];
-                    if (mayBeStatement.type == 'statement') {
-                        let result = null;
-                        try {
-                            result = evaluate(mayBeStatement.children[0], localEnvironment);
-                        } catch (error) {
-
-                            if (error === "Cannot evaluate:ifStatement") {
-                                yield* ifExecutorFunction(mayBeStatement, localEnvironment);
-                            } else {
-                                throw patchError(error, "catchError");
-                            }
-
-                        }
-
-                        if (result && result.constructor === evaluate.ERROR) {
-                            throw patchError(result, "returnError");
-                        }
-                    } else if (mayBeStatement.type != "emptylines") {
-                        throw patchError(mayBeStatement, "statementError");
-                    }
-
-                }
-
-            } catch (error) {
-                gotAnError = true;
-                console.log(error);
-                yield error;
-            }
-
-
-        } while (gotAnError);
-
+        let body = tree.children[0].children[0];
+        yield* statementBlockExecutor(body,environment,3)
 
     }
 
@@ -101,32 +110,7 @@ let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
 
 let executorFunction = function* executorFunction(tree) {
 
-    //Run build loop
-    const environment = envCreate();
-    for (let index = 0; index < tree.children.length; index++) {
-        const mayBeStatement = tree.children[index];
-        if (mayBeStatement.type == 'statement') {
-            let result = null;
-            try {
-                result = evaluate(mayBeStatement.children[0], environment);
-            } catch (error) {
-
-                if (error === "Cannot evaluate:ifStatement") {
-                    yield* ifExecutorFunction(mayBeStatement, environment);
-                }
-
-            }
-
-            if (result && result.constructor === evaluate.ERROR) {
-                throw (result);
-            }
-        } else if (mayBeStatement.type != "emptylines") {
-            throw (mayBeStatement);
-        }
-
-    }
-
-
+    yield * statementBlockExecutor(tree,null,0);
 
 }
 
