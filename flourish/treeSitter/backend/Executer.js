@@ -98,34 +98,31 @@ let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
 let executorFunction = function* executorFunction(tree) {
 
     //Run build loop
-    while (true) {
-        const environment = envCreate();
-        for (let index = 0; index < tree.children.length; index++) {
-            const mayBeStatement = tree.children[index];
-            if (mayBeStatement.type == 'statement') {
-                let result = null;
-                try {
-                    result = evaluate(mayBeStatement.children[0], environment);
-                } catch (error) {
+    const environment = envCreate();
+    for (let index = 0; index < tree.children.length; index++) {
+        const mayBeStatement = tree.children[index];
+        if (mayBeStatement.type == 'statement') {
+            let result = null;
+            try {
+                result = evaluate(mayBeStatement.children[0], environment);
+            } catch (error) {
 
-                    if (error === "Cannot evaluate:ifStatement") {
-                        yield* ifExecutorFunction(mayBeStatement, environment);
-                    }
-
+                if (error === "Cannot evaluate:ifStatement") {
+                    yield* ifExecutorFunction(mayBeStatement, environment);
                 }
 
-                if (result && result.constructor === evaluate.ERROR) {
-                    throw (result);
-                }
-            } else if (mayBeStatement.type != "emptylines") {
-                throw (mayBeStatement);
             }
 
+            if (result && result.constructor === evaluate.ERROR) {
+                throw (result);
+            }
+        } else if (mayBeStatement.type != "emptylines") {
+            throw (mayBeStatement);
         }
 
-
-        yield "Nothing"
     }
+
+
 
 }
 
