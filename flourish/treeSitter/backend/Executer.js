@@ -98,10 +98,11 @@ let statementBlockExecutor = function* statementBlockExecutor(body, environment,
 
 
 let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
+
     let expressionNode = tree.children[0].children[0].children[1];
     if ((evaluate(expressionNode, environment) != false)) {
-        let body = tree.children[0].children[0];
-        yield* statementBlockExecutor(body,environment,3)
+        let body = tree.children[0].children[0].children[3];
+        yield* statementBlockExecutor(body,environment,0)
 
     }
 
@@ -110,7 +111,7 @@ let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
 
 let executorFunction = function* executorFunction(tree) {
 
-    yield * statementBlockExecutor(tree,null,0);
+    yield * statementBlockExecutor(tree.children[0],null,0);
 
 }
 
