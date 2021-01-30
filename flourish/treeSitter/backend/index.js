@@ -17,10 +17,9 @@ const Parser = require('./Parser')
 
 /**Patch tree for consumption of codemirror  */
 function patchTree(tree, result) {
-
     let errors = [];
-    if (result.done == false)
-        errors.push(result.value);
+    if (result)
+        errors.push(result);
     tree.errors = errors;
     return tree;
 }
@@ -54,8 +53,7 @@ io.on('connection', socket => {
     socket.on('parseIncremental', data => {
         const newSourceCode = data.newtext;
         let [tree, changes] = parser.parseIncremental(newSourceCode, data.posInfo)
-        if(lastResult && lastResult.done ==true)
-            executer.reset();
+        
         let result = executer.execute()
         tree = patchTree(tree, result);
         tree.changes = changes;

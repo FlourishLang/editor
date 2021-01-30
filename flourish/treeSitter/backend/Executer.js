@@ -11,7 +11,22 @@ class Executer {
 
 
     execute(state) {
-        return this.executor.next(state);
+
+        do {
+            let result = this.executor.next(state);
+            if (result.done == true) {
+                this.reset();
+                return null;
+            }
+            else {
+                if(result.value !="External mutation") //Todo redesign
+                return result.value;
+            }
+
+        } while (true);
+        
+
+
     }
 
     reset(){
@@ -86,7 +101,13 @@ let statementBlockExecutor = function* statementBlockExecutor(body, environment,
         } catch (error) {
             gotAnError = true;
             console.log(error);
+
             yield error;
+
+            if (body.isMutated == false)
+                throw "External mutation";
+
+
         }
 
 
