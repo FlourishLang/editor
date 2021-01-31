@@ -14,15 +14,16 @@ class Executer {
 
         do {
             let result = this.executor.next(state);
-            if(result.value ==="External mutation") //Todo redesign
-                    continue;
 
             if (result.done == true) {
                 this.reset();
             }
+            if (result.value === "External mutation") //Todo redesign
+                continue;
+
             return result.value;
         } while (true);
-        
+
 
 
     }
@@ -62,6 +63,8 @@ function patchError(error, type, statement) {
             return evaluate.ERROR.fromAst(error, 'Statement expected')
 
         case "internalException":
+            if(!error.message)
+                return error; 
             return evaluate.ERROR.fromAst(statement, error.message)
     }
 }
