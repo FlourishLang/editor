@@ -12,7 +12,7 @@
   "dependencies": {
     "least-common-ancestor": "^1.0.0",
     "nodemon": "^2.0.2",
-    "socket.io": "^2.3.0",
+    "socket.io": "^2.4.1",
     "tree-sitter": "^0.16.0",
     "tree-sitter-flourish": "../../../../tree-sitter-flourish/"
   },
