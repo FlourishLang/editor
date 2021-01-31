@@ -39,13 +39,13 @@ class Executer {
 module.exports = Executer;
 
 
-function patchError(error, type) {
+function patchError(error, type, statement) {
     switch (type) {
         case "returnError":
             {
-                if (!error.startPosition) {
-                    error.startPosition = error.startPosition;
-                    error.endPosition = error.endPosition;
+                if (!error.startPosition && statement) {
+                    error.startPosition = statement.startPosition;
+                    error.endPosition = statement.endPosition;
                 }
 
                 if (error.startPosition.line == error.endPosition.line
@@ -82,13 +82,13 @@ let statementBlockExecutor = function* statementBlockExecutor(body, environment,
                         if (error === "Cannot evaluate:ifStatement") {
                             yield* ifExecutorFunction(mayBeStatement, localEnvironment);
                         } else {
-                            throw patchError(error, "catchError");
+                            throw patchError(error, "catchError", mayBeStatement);
                         }
 
                     }
 
                     if (result && result.constructor === evaluate.ERROR) {
-                        throw patchError(result, "returnError");
+                        throw patchError(result, "returnError", mayBeStatement);
                     }
                 } else if (mayBeStatement.type != "emptylines") {
                     throw patchError(mayBeStatement, "statementError");
