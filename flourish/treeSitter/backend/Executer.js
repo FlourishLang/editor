@@ -60,6 +60,9 @@ function patchError(error, type, statement) {
 
         case "statementError":
             return evaluate.ERROR.fromAst(error, 'Statement expected')
+
+        case "internalException":
+            return evaluate.ERROR.fromAst(statement, error.message)
     }
 }
 
@@ -80,7 +83,20 @@ let statementBlockExecutor = function* statementBlockExecutor(body, environment,
                     } catch (error) {
 
                         if (error === "Cannot evaluate:ifStatement") {
-                            yield* ifExecutorFunction(mayBeStatement, localEnvironment);
+
+                            //TODO: Redesign this part
+                            try {
+                                yield* ifExecutorFunction(mayBeStatement, localEnvironment);    
+                            } catch (error) {
+                                if(!(error instanceof evaluate.ERROR))
+                                {
+                                    throw patchError(error, "internalException", mayBeStatement);
+                                }else{
+                                    throw error;
+                                }
+
+                            }
+                            
                         } else {
                             throw patchError(error, "catchError", mayBeStatement);
                         }
