@@ -46,8 +46,8 @@ function patchError(error, type) {
         case "returnError":
             {
                 if (!error.startPosition) {
-                    error.startPosition = mayBeStatement.startPosition;
-                    error.endPosition = mayBeStatement.endPosition;
+                    error.startPosition = error.startPosition;
+                    error.endPosition = error.endPosition;
                 }
 
                 if (error.startPosition.line == error.endPosition.line
@@ -58,10 +58,10 @@ function patchError(error, type) {
             return error;
         case "catchError":
 
-            return evaluate.ERROR.fromAst(mayBeStatement, `Unhandled error in eval ${error}`);
+            return evaluate.ERROR.fromAst(error, `Unhandled error in eval ${error}`);
 
         case "statementError":
-            return evaluate.ERROR.fromAst(mayBeStatement, 'Statement expected')
+            return evaluate.ERROR.fromAst(error, 'Statement expected')
     }
 }
 
@@ -121,9 +121,14 @@ let statementBlockExecutor = function* statementBlockExecutor(body, environment,
 let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
 
     let expressionNode = tree.children[0].children[0].children[1];
-    if ((evaluate(expressionNode, environment) != false)) {
+    let result = evaluate(expressionNode, environment);
+    if (result && result.constructor === evaluate.ERROR) {
+        throw patchError(result, "returnError");
+    }
+
+    if (result != false) {
         let body = tree.children[0].children[0].children[3];
-        yield* statementBlockExecutor(body,environment,0)
+        yield* statementBlockExecutor(body, environment, 0)
 
     }
 
