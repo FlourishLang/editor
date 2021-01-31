@@ -14,15 +14,13 @@ class Executer {
 
         do {
             let result = this.executor.next(state);
+            if(result.value ==="External mutation") //Todo redesign
+                    continue;
+
             if (result.done == true) {
                 this.reset();
-                return null;
             }
-            else {
-                if(result.value !="External mutation") //Todo redesign
-                return result.value;
-            }
-
+            return result.value;
         } while (true);
         
 
@@ -137,7 +135,15 @@ let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
 
 let executorFunction = function* executorFunction(tree) {
 
-    yield * statementBlockExecutor(tree.children[0],null,0);
+    try {
+        yield * statementBlockExecutor(tree.children[0],null,0);  
+        if(tree.children.length == 2 && tree.children[1].type == "ERROR")
+            throw patchError(tree.children[1], "statementError");
+    } catch (error) {
+        return error;
+    }
+    
+    return null;
 
 }
 
