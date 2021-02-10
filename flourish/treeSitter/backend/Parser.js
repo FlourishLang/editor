@@ -21,7 +21,7 @@ class FlourishParser {
     parse(sourceCode) {
         this.tsTree = this.parser.parse(sourceCode);
         this.fNodeTree = FNode.reConciliation(this.fNodeTree, null, this.tsTree);
-        this.leastCommonAncesestor = leastCommonAncestorFunctionGenerator(this.fNodeTree, node => node.children);
+        // this.leastCommonAncesestor = leastCommonAncestorFunctionGenerator(this.fNodeTree, node => node.children);
 
         return this.fNodeTree;
     }
@@ -37,7 +37,7 @@ class FlourishParser {
         let editedRange = tree.getEditedRange()
         this.fNodeTree = FNode.reConciliation(this.fNodeTree, tree, newTree)
 
-        this.leastCommonAncesestor.rebuild();
+        // this.leastCommonAncesestor.rebuild();
         const changes = { changedRange, editedRange };
         this.tsTree = newTree;
         return [this.fNodeTree, changes];

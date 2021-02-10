@@ -37,12 +37,14 @@ io.on('connection', socket => {
         hasconnection =true;
 
 
+        // descendantForPosition
 
     let parser = null;
     let executer = null;
+    let outTree = null;
     socket.on('parse', sourceCode => {
         parser = new Parser();
-        let outTree = parser.parse(sourceCode);
+        outTree = parser.parse(sourceCode);
         executer = new Executer(outTree);
         let result = executer.execute()
         outTree = patchTree(outTree, result);
@@ -50,6 +52,14 @@ io.on('connection', socket => {
 
         socket.emit('parseComplete', outTree);
     });
+
+    socket.on('setActiveLine', lineNumber => {
+        
+        executer.setActiveLine(lineNumber);
+        
+    });
+
+    
 
     let lastResult = null; //TODO:Redesign
     socket.on('parseIncremental', data => {

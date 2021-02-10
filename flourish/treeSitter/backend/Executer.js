@@ -1,11 +1,13 @@
 const evaluate = require('./evaluate');
 const envCreate = require('./environment').create;
+const bs = require("binary-search");
 
 class Executer {
 
 
     constructor(intree) {
         this.tree = intree;
+        this.desiredActiveBlock  = null; //Block where execution cycle supposed to run
         this.reset();
     }
 
@@ -18,7 +20,11 @@ class Executer {
             if (result.done == true) {
                 this.reset();
             }
-            if (result.value === "External mutation") //Todo redesign
+
+            if(result.value === "isDesiredActiveBlock")
+                return null;
+
+            if (result.value === "External mutation" ) //Todo redesign
                 continue;
 
             return result.value;
@@ -31,6 +37,71 @@ class Executer {
     reset(){
         this.executor = executorFunction(this.tree);
 
+    }
+
+
+
+    _iterativeSearch(tree, linenum) 
+    { 
+        function adjustedEndPosition(end) {
+            if (end.column == 0 && end.row>0) {
+                return {row:end.row-1,column:end.column};
+            }
+            return end;
+        }
+
+        let cursor = tree;
+        // Traverse untill root reaches to dead end 
+        let lastBlock = null;
+        
+       
+        while (cursor != null) { 
+            if(cursor.type == "block")
+                lastBlock = cursor;
+
+            let result  = bs(cursor.children,linenum,(element,needle)=>{
+
+                if (adjustedEndPosition(element.endPosition).row < needle) {
+                    return -1;
+                } else if (element.startPosition.row > needle) {
+                    return 1;
+                } else if(element.startPosition.row <= needle
+                    && adjustedEndPosition(element.endPosition).row >= needle){
+
+                       return 0; 
+                }
+                throw "should not come here"
+
+            });
+
+            let resultnode = cursor.children[result];
+            if (resultnode) {
+                cursor = resultnode;
+            }else{
+                cursor = null;
+            }
+            
+        } 
+        
+        return lastBlock; 
+     
+    
+    }
+
+    setActiveLine(linenumber){
+        return;
+
+        let expectedActiveBlock = this._iterativeSearch(this.tree,linenumber);
+        if (expectedActiveBlock!=this.desiredActiveBlock) {//User want to run this block
+            if(this.desiredActiveBlock)
+                this.desiredActiveBlock.isDesiredActiveBlock = false;
+
+            this.desiredActiveBlock = null;            
+            this.desiredActiveBlock = expectedActiveBlock;
+            this.desiredActiveBlock.isDesiredActiveBlock = true;
+
+            console.log(this.desiredActiveBlock.getText());
+        }
     }
 
 
@@ -127,8 +198,10 @@ let statementBlockExecutor = function* statementBlockExecutor(body, environment,
 
         }
 
+        if(body.isDesiredActiveBlock && !gotAnError)
+            yield "isDesiredActiveBlock"
 
-    } while (gotAnError);
+    } while (gotAnError||body.isDesiredActiveBlock);
 
 
 }

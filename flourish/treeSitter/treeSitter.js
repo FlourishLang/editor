@@ -10,7 +10,7 @@
     mod(CodeMirror);
 })(function (CodeMirror) {
   "use strict";
-  
+
 
 
 
@@ -38,8 +38,8 @@
 
   }
 
-  let editmark=null;
-  let changemarks=null;
+  let editmark = null;
+  let changemarks = null;
 
 
   function startTreeSitterParsing(cm) {
@@ -47,24 +47,47 @@
       console.error("Unable to get socket.io, failing");
       return;
     }
-    
+
     var state = cm.state.treeSitterParse, options = state.options;
 
-    window.onbeforeunload = ()=>{
+    window.onbeforeunload = () => {
       if (state && state.socket) {
         state.socket.disconnect();
       }
     };
-  
 
-    
+
+
     state.socket = io('http://localhost:3000');
     state.socket.on('connect', function () {
+      let activeLine = 0;
+      let updatedActiveLine = false;
+      let timeoutForActiveline = null;
+      cm.on("beforeSelectionChange", function name(cm, sel) {
+        if (sel.ranges[0].head.line == sel.ranges[0].anchor.line
+          && sel.ranges[0].head.ch == sel.ranges[0].anchor.ch) {
+            activeLine = sel.ranges[0].head.line;
+            updatedActiveLine = true;
+            // console.log('setActiveLine',sel.ranges[0].head.line);
+          // state.socket.emit('setActiveLine',sel.ranges[0].head.line);
+          timeoutForActiveline = setTimeout(() => {
+            state.socket.emit('setActiveLine',activeLine);  
+          }, 300);
+        }
+        // 
+      });
+
+
       state.socket.emit('parse', cm.getValue())
       state.socket.on('parseComplete', function (treeInfo) {
-        
 
-        if(editmark){
+        if (updatedActiveLine) {
+          clearTimeout(timeoutForActiveline);
+          state.socket.emit('setActiveLine',activeLine);  
+          updatedActiveLine = false;
+        } 
+
+        if (editmark) {
           editmark.clear();
           editmark = null;
         }
@@ -83,14 +106,14 @@
         //
 
         if (changemarks) {
-          changemarks.forEach(item=>item.clear());
-          changemarks=null;
+          changemarks.forEach(item => item.clear());
+          changemarks = null;
         }
 
         if (treeInfo.changes) {
-          changemarks=[];
-          treeInfo.changes.changedRange.forEach(item=>{
-            changemarks.push(  cm.doc.markText(
+          changemarks = [];
+          treeInfo.changes.changedRange.forEach(item => {
+            changemarks.push(cm.doc.markText(
               {
                 line: item.startPosition.row,
                 ch: item.startPosition.column
@@ -106,21 +129,21 @@
 
         if (cm.getMode().hasOwnProperty("treeSitterTree"))
 
-        cm.operation(function () {
-          cm.getMode().treeSitterTree = treeInfo;
-          cm.performLint();
+          cm.operation(function () {
+            cm.getMode().treeSitterTree = treeInfo;
+            cm.performLint();
 
-          if (treeInfo.changes) {
+            if (treeInfo.changes) {
 
-            let finalrange = calculateFullRange(treeInfo.changes.changedRange, treeInfo.changes.editedRange);
-            let finalStartPos = cm.doc.posFromIndex(finalrange.startIndex);
-            let finalEndPos = cm.doc.posFromIndex(finalrange.endIndex);
-            cm.refreshPart(finalStartPos.line, finalEndPos.line+1);
-          } else {
-            cm.refreshPart();
+              let finalrange = calculateFullRange(treeInfo.changes.changedRange, treeInfo.changes.editedRange);
+              let finalStartPos = cm.doc.posFromIndex(finalrange.startIndex);
+              let finalEndPos = cm.doc.posFromIndex(finalrange.endIndex);
+              cm.refreshPart(finalStartPos.line, finalEndPos.line + 1);
+            } else {
+              cm.refreshPart();
 
-          }
-        })
+            }
+          })
 
 
       });
@@ -132,7 +155,9 @@
 
   function updateTreeSitterParsing(cm, newtext, posInfo) {
     var state = cm.state.treeSitterParse, options = state.options;
+    console.log(cm.state.activeLines);
     state.socket.emit('parseIncremental', { newtext, posInfo });
+
 
   }
 
