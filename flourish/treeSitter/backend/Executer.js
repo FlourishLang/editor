@@ -1,4 +1,4 @@
-const evaluate = require('./evaluate');
+const { evaluate, ERROR } = require('./evaluate');
 const envCreate = require('./environment').create;
 const bs = require("binary-search");
 
@@ -34,7 +34,7 @@ class Executer {
 
     }
 
-    reset(){
+    reset() {
         this.executor = executorFunction(this.tree);
 
     }
@@ -128,15 +128,15 @@ function patchError(error, type, statement) {
             return error;
         case "catchError":
 
-            return evaluate.ERROR.fromAst(error, `Unhandled error in eval ${error}`);
+            return ERROR.fromAst(error, `Unhandled error in eval ${error}`);
 
         case "statementError":
-            return evaluate.ERROR.fromAst(error, 'Statement expected')
+            return ERROR.fromAst(error, 'Statement expected')
 
         case "internalException":
-            if(!error.message)
-                return error; 
-            return evaluate.ERROR.fromAst(statement, error.message)
+            if (!error.message)
+                return error;
+            return ERROR.fromAst(statement, error.message)
     }
 }
 
@@ -152,35 +152,19 @@ let statementBlockExecutor = function* statementBlockExecutor(body, environment,
                 const mayBeStatement = body.children[index];
                 if (mayBeStatement.type == 'statement') {
                     let result = null;
-                    try {
-                        result = evaluate(mayBeStatement.children[0], localEnvironment);
-                    } catch (error) {
-
-                        if (error === "Cannot evaluate:ifStatement") {
-
-                            //TODO: Redesign this part
-                            try {
-                                yield* ifExecutorFunction(mayBeStatement, localEnvironment);    
-                            } catch (error) {
-                                if(!(error instanceof evaluate.ERROR))
-                                {
-                                    throw patchError(error, "internalException", mayBeStatement);
-                                }else{
-                                    throw error;
-                                }
-
-                            }
-                            
-                        } else {
-                            throw patchError(error, "catchError", mayBeStatement);
-                        }
-
+                    switch (mayBeStatement.children[0].type) {
+                        case "expression":
+                            result = yield* evaluate(mayBeStatement.children[0], localEnvironment);
+                            break;
+                        case "ifStatement":
+                            yield* ifExecutorFunction(mayBeStatement, localEnvironment);
+                            break;
+                        default:
+                            throw "Unhandled statment"
+                            break;
                     }
 
-                    if (result && result.constructor === evaluate.ERROR) {
-                        throw patchError(result, "returnError", mayBeStatement);
-                    }
-                } else if (mayBeStatement.type != "emptylines") {
+                }else if (mayBeStatement.type != "emptylines") {
                     throw patchError(mayBeStatement, "statementError");
                 }
 
@@ -211,10 +195,7 @@ let statementBlockExecutor = function* statementBlockExecutor(body, environment,
 let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
 
     let expressionNode = tree.children[0].children[0].children[1];
-    let result = evaluate(expressionNode, environment);
-    if (result && result.constructor === evaluate.ERROR) {
-        throw patchError(result, "returnError");
-    }
+    let result = yield* evaluate(expressionNode, environment);
 
     if (result != false) {
         let body = tree.children[0].children[0].children[3];
@@ -228,13 +209,13 @@ let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
 let executorFunction = function* executorFunction(tree) {
 
     try {
-        yield * statementBlockExecutor(tree.children[0],null,0);  
-        if(tree.children.length == 2 && tree.children[1].type == "ERROR")
+        yield* statementBlockExecutor(tree.children[0], null, 0);
+        if (tree.children.length == 2 && tree.children[1].type == "ERROR")
             throw patchError(tree.children[1], "statementError");
     } catch (error) {
         return error;
     }
-    
+
     return null;
 
 }
