@@ -111,7 +111,13 @@ function* evaluate(ast, env) {
                     for (let index = 0; index < args.length; index++) {
                         evaluatedArguments.push(yield* evaluate(args[index], env));
                     }
-                    return yield * cmd.call(null, evaluatedArguments, env)
+                    try {
+                        return yield * cmd.call(null, evaluatedArguments, env)    
+                    } catch (error) {
+                        throw ERROR.fromAst(ast, `Internal Exception: ${error.message}`);
+
+                    }
+                    
 
                 }
 
