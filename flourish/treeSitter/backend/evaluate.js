@@ -13,14 +13,14 @@ class ERROR {
 
 let specialEnv = {
 
-    'set': function (args, env) {
+    'set': function* (args, env) {
 
         if (args.length != 2) {
             if (args.length) {
-                return new ERROR(`Mismatching no of argument for set(${args.length}) expected 2`,
+                throw new ERROR(`Mismatching no of argument for set(${args.length}) expected 2`,
                     args[0].startPosition, args[args.length - 1].endPosition);
             } else {
-                return new ERROR(`Mismatching no of argument for set(${args.length}) expected 2`)
+                throw new ERROR(`Mismatching no of argument for set(${args.length}) expected 2`)
             }
         }
 
@@ -28,23 +28,18 @@ let specialEnv = {
 
         let identifier = args[0].children[0].leafText;
         if (args[0].children[0].type !== "identifier") {
-            return ERROR.fromAst(args[0].children[0], `identifier expected found ${args[0].children[0].type}`);
+            throw ERROR.fromAst(args[0].children[0], `identifier expected found ${args[0].children[0].type}`);
         }
 
         if (env[identifier] == undefined) {
         {
-            let res = evaluate(args[1], env);
-            if (res instanceof evaluate.ERROR) {
-                return res;
-            }else{
-                env[identifier] = res;          
-            }
-            
+            let res = yield * evaluate(args[1], env);
+            env[identifier] = res;                 
             return env[identifier];            
         }
             
         } else {
-            return ERROR.fromAst(args[0].children[0], `Can't reset identifier: ${identifier}`);
+            throw ERROR.fromAst(args[0].children[0], `Can't reset identifier: ${identifier}`);
         }
 
     },
@@ -53,7 +48,7 @@ let specialEnv = {
         if (env[identifier] == undefined) {
             if (env.super)
                 return get(arg, env.super);
-            return ERROR.fromAst(arg, `Can't find identifier: ${identifier}`);
+            throw ERROR.fromAst(arg, `Can't find identifier: ${identifier}`);
 
         } else {
             return env[identifier];
@@ -65,8 +60,14 @@ let specialEnv = {
 }
 
 
+function getSpecialCmd(cmd) {
+    if (cmd.type == "cmd")
+        return specialEnv[cmd.children[0].leafText];
+    return null;
+}
 
-function evaluate(ast, env) {
+
+function* evaluate(ast, env) {
     if (ast.hasError) {
         function subject(ast) {
             if (ast.type == "ERROR") {
@@ -82,9 +83,9 @@ function evaluate(ast, env) {
         let error = ast.children.find(i => i.isMissingNode || i.type === "ERROR");
         if (error) {
             if (error.isMissingNode) {
-                return new ERROR(`Syntax error missing ${subject(error)}`, error.startPosition, error.endPosition);
+                throw new ERROR(`Syntax error missing ${subject(error)}`, error.startPosition, error.endPosition);
             } else {
-                return new ERROR(`Syntax error unexpected ${subject(error)}`, error.startPosition, error.endPosition);
+                throw new ERROR(`Syntax error unexpected ${subject(error)}`, error.startPosition, error.endPosition);
             }
         }
     }
@@ -95,18 +96,32 @@ function evaluate(ast, env) {
     switch (ast.type) {
         case "expression":
             {
-                let cmd = evaluate(ast.children[0], env);
-                if (cmd.constructor == ERROR) {
-                    return cmd;
+                let specialCmd = getSpecialCmd(ast.children[0]); //Like macro
+                if (specialCmd) {
+                    args = ast.children.slice(1);
+                    return yield* specialCmd(args, env);
+                } else {
+
+                    //Non special forms -  arguments evaluated
+
+                    let cmd = yield* evaluate(ast.children[0], env);
+                    args = ast.children.slice(1);
+
+                    let evaluatedArguments = [];
+                    for (let index = 0; index < args.length; index++) {
+                        evaluatedArguments.push(yield* evaluate(args[index], env));
+                    }
+                    return yield * cmd.call(null, evaluatedArguments, env)
+
                 }
-                args = ast.children.slice(1);
-                return cmd.call(null, args, env);
+
             }
+            break;
         case "compoundExpression":
             {
                 let actualChildren = ast.children.slice(1);
                 actualChildren.pop();
-                let result = evaluate(actualChildren[0], env);
+                let result = yield * evaluate(actualChildren[0], env);
                 return result;
             }
             break;
@@ -117,7 +132,7 @@ function evaluate(ast, env) {
             return specialEnv["get"].call(this, ast, env);
 
         case "cmd": case "operator": case 'argument':
-            return evaluate(ast.children[0], env);
+            return yield * evaluate(ast.children[0], env);
 
         case "+":
             return specialEnv["get"].call(this, { leafText: "add" }, env);
@@ -135,10 +150,12 @@ function evaluate(ast, env) {
 
 
         default:
+            debugger;
             throw ("Cannot evaluate:" + ast.type);
             break;
     }
 }
 
-evaluate.ERROR = ERROR;
-module.exports = evaluate;
+module.exports.ERROR = ERROR;
+module.exports.evaluate = evaluate;
+module.exports.specialEnv = specialEnv;
