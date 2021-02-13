@@ -89,7 +89,7 @@ class Executer {
     }
 
     setActiveLine(linenumber){
-        return;
+        // return;
 
         let expectedActiveBlock = this._iterativeSearch(this.tree,linenumber);
         if (expectedActiveBlock!=this.desiredActiveBlock) {//User want to run this block
@@ -143,14 +143,18 @@ function patchError(error, type, statement) {
 
 
 let statementBlockExecutor = function* statementBlockExecutor(body, environment, startStatement) {
+
     let gotAnError = false;
     do {
+        console.log(`Run :Block}`);
+
         gotAnError = false;
         let localEnvironment = envCreate(environment); //Every new try creates a new enviornment
         try {
             for (let index = startStatement; index < body.children.length; index++) {
                 const mayBeStatement = body.children[index];
                 if (mayBeStatement.type == 'statement') {
+                    console.log(`Run :${mayBeStatement.getText()}`);
                     let result = null;
                     switch (mayBeStatement.children[0].type) {
                         case "expression":
@@ -207,7 +211,7 @@ let ifExecutorFunction = function* ifExecutorFunction(tree, environment) {
 }
 
 let executorFunction = function* executorFunction(tree) {
-
+    console.log(`Run :Begin`);
     try {
         yield* statementBlockExecutor(tree.children[0], null, 0);
         if (tree.children.length == 2 && tree.children[1].type == "ERROR")

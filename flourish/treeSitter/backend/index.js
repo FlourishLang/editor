@@ -7,15 +7,7 @@ const Executer = require('./Executer');
 const Parser = require('./Parser')
 
 
-// const evaluate = function name(ast,env) {
-//     if(!ast.isMutated)
-//         console.log("Mutated",ast.leafText)
-//     if(ast.children && ast.children.length){
-//         ast.children.forEach(element => {
-//             evaluate(element,env);
-//         });
-//     }
-// }
+
 
 /**Patch tree for consumption of codemirror  */
 function patchTree(tree, result) {
