@@ -99,7 +99,16 @@ function* evaluate(ast, env) {
                 let specialCmd = getSpecialCmd(ast.children[0]); //Like macro
                 if (specialCmd) {
                     args = ast.children.slice(1);
-                    return yield* specialCmd(args, env);
+                    try {
+                        return yield* specialCmd(args, env);    
+                    } catch (error) {
+                        if (!error.startPosition ) {
+
+                            error = ERROR.fromAst(ast, error.message);
+                        }
+                        throw error;
+                    }
+                    
                 } else {
 
                     //Non special forms -  arguments evaluated
