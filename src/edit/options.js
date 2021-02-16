@@ -146,7 +146,7 @@ export function defineOptions(CodeMirror) {
   option("addModeClass", false, resetModeState, true)
   option("pollInterval", 100)
   option("undoDepth", 200, (cm, val) => cm.doc.history.undoDepth = val)
-  option("historyEventDelay", 1250)
+  option("historyEventDelay", 50)
   option("viewportMargin", 10, cm => cm.refresh(), true)
   option("maxHighlightLength", 10000, resetModeState, true)
   option("moveInputWithCursor", true, (cm, val) => {
