@@ -98,9 +98,9 @@ class Executer {
 
             this.desiredActiveBlock = null;            
             this.desiredActiveBlock = expectedActiveBlock;
-            this.desiredActiveBlock.isDesiredActiveBlock = true;
+            if(this.desiredActiveBlock)
+                this.desiredActiveBlock.isDesiredActiveBlock = true;
 
-            console.log(this.desiredActiveBlock.getText());
         }
     }
 
