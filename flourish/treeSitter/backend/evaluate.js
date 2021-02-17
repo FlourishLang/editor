@@ -98,9 +98,9 @@ function* evaluate(ast, env) {
             {
                 let specialCmd = getSpecialCmd(ast.children[0]); //Like macro
                 if (specialCmd) {
-                    args = ast.children.slice(1);
+                    let cmdArguments = ast.children.slice(1);
                     try {
-                        return yield* specialCmd(args, env);    
+                        return yield* specialCmd(cmdArguments, env);    
                     } catch (error) {
                         if (!error.startPosition ) {
 
@@ -114,11 +114,12 @@ function* evaluate(ast, env) {
                     //Non special forms -  arguments evaluated
 
                     let cmd = yield* evaluate(ast.children[0], env);
-                    args = ast.children.slice(1);
+                    let cmdArguments  = ast.children.slice(1);
 
                     let evaluatedArguments = [];
-                    for (let index = 0; index < args.length; index++) {
-                        evaluatedArguments.push(yield* evaluate(args[index], env));
+                    for (let index = 0; index < cmdArguments.length; index++) {
+                        let argEvalResult = yield* evaluate(cmdArguments[index], env); 
+                        evaluatedArguments.push(argEvalResult);
                     }
                     try {
                         return yield * cmd.call(null, evaluatedArguments, env)    
