@@ -1,4 +1,4 @@
-
+let parentMap = new WeakMap();
 
 
 class FNode {
@@ -34,6 +34,10 @@ class FNode {
             return this.leafText;
         else
             return this.children.map(i => i.getText()).join('');
+    }
+
+    getParent(){
+        return parentMap.get(this);
     }
 
 
@@ -95,6 +99,7 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
     if (oldTsTree == null) {
         let fNode = new FNode(newTsTree)
         fNode.children = newTsTree.children.map((child) => reConciliationNode(oldFNodeTree, oldTsTree, child))
+        fNode.children.forEach(child=>{parentMap.set(child,fNode)});
         return fNode;
 
     } else if (isEqualNodeMemory(oldTsTree, newTsTree, oldFNodeTree)) {
@@ -114,10 +119,12 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
                 let newFNodeChild = reConciliationNode(oldFNodeTree.children[index], oldTsTree.children[index + indexOffSet], child);
                 if (newFNodeChild) {
                     oldFNodeTree.children[index] = newFNodeChild;
+                    parentMap.set(newFNodeChild,oldFNodeTree);
                 }
                 else {
                     let newFNodeChild = reConciliationNode(null, null, child);
                     oldFNodeTree.children[index] = newFNodeChild;
+                    parentMap.set(newFNodeChild,oldFNodeTree);
                 }
 
 
@@ -128,6 +135,7 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
                 let newFNodeChild = reConciliationNode(oldFNodeTree.children[index], oldTsTree.children[index + indexOffSet], child);
                 if (newFNodeChild) {
                     oldFNodeTree.children[index] = newFNodeChild;
+                    parentMap.set(newFNodeChild,oldFNodeTree);
                 }
                 else {
 
@@ -140,10 +148,12 @@ function reConciliationNode(oldFNodeTree, oldTsTree, newTsTree) {
                 if (oldFNodeTree.children.length <= index) {
                     let newFNodeChild = reConciliationNode(null, null, child);
                     oldFNodeTree.children.push(newFNodeChild);
+                    parentMap.set(newFNodeChild,oldFNodeTree);
                 } else {
                     let newFNodeChild = reConciliationNode(oldFNodeTree.children[index], oldTsTree.children[index + indexOffSet], child);
                     if (newFNodeChild) {
                         oldFNodeTree.children[index] = newFNodeChild;
+                        parentMap.set(newFNodeChild,oldFNodeTree);
                     } else {
                         let newFNodeChild = reConciliationNode(null, null, child);
                         oldFNodeTree.children.splice(index, 0, newFNodeChild);
