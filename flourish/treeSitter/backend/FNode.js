@@ -184,8 +184,26 @@ function clearNonMutation(fNode) {
         fNode.children.forEach(element => clearNonMutation(element));
 }
 
+function accumulateMutatedLeaf(fNode,resultarray) {
+
+    if (fNode.isMutated == false)
+        return;
+    if (fNode.children.length == 0)
+        resultarray.push(fNode);
+    else {
+        fNode.children.forEach(element => {
+            accumulateMutatedLeaf(element, resultarray);
+        });
+    }
+        
+}
 
 
+FNode.accumulateMutatedLeaf = function accumulator(node) {
+    let array = [];
+    accumulateMutatedLeaf(node,array);
+    return array;
+}
 FNode.reConciliation = function (oldFNodeTree, oldTsTree, newTsTree) {
     mapMemorization.clear();
     clearNonMutation(oldFNodeTree);

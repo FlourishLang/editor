@@ -40,80 +40,125 @@ print [+ 1]
 
     });
 
+
+
+
     describe("Incremental  parsing", () => {
+
         it('Restore original tree after undoing', () => {
             let text =
-                `print [+ 1] 
-
-print [+ 1]
-`;
+                'set a [+ 1]\n';
             let flourishParser = new Parser();
             let tree = flourishParser.parse(text);
             let treeString = JSON.stringify(tree);
-            let updatedText =
-                `print [+ 1] 
-print 2
-print [+ 1]
-`
+            let updatedText ='set a + 1]\n';
             let edit = {
-                startIndex: 13,
-                oldEndIndex: 13,
-                newEndIndex: 20,
-                startPosition: { row: 1, column: 0 },
-                oldEndPosition: { row: 1, column: 0 },
-                newEndPosition: { row: 1, column: 7 }
+                startIndex: 6,
+                oldEndIndex: 7,
+                newEndIndex: 6,
+                startPosition: { row: 0, column: 6 },
+                oldEndPosition: { row: 0, column: 7 },
+                newEndPosition: { row: 0, column: 6 }
             }
 
             let treeChildren = tree.children.slice();
-            let [newTree, ] = flourishParser.parseIncremental(updatedText, edit);
+            let [newTree,changes] = flourishParser.parseIncremental(updatedText, edit);
 
 
             let reverseEdit = {
-                startIndex: 13,
-                oldEndIndex: 20,
-                newEndIndex: 13,
-                startPosition: { row: 1, column: 0 },
-                oldEndPosition: { row: 1, column: 7 },
-                newEndPosition: { row: 1, column: 0 }
+                startIndex: 6,
+                oldEndIndex: 6,
+                newEndIndex: 7,
+                startPosition: { row: 0, column: 6 },
+                oldEndPosition: { row: 0, column: 6 },
+                newEndPosition: { row: 0, column: 7 }
             }
 
-            let [newTree2, ] = flourishParser.parseIncremental(text, reverseEdit);
+            let [newTree2, changes2] = flourishParser.parseIncremental(text, reverseEdit);
 
             let treeString2 = JSON.stringify(newTree2);
-            assert.equal(treeString2,treeString);
+            assert.strictEqual(treeString2,treeString);
+            // assert.strictEqual(changes.mutatedRoot,newTree2);
+            debugger;
         });
 
-        it('Should retain treeNode after edit', () => {
-            let text =
-                `print (+ 1) 
-
-print (+ 1)
-`;
-            let flourishParser = new Parser();
-            let tree = flourishParser.parse(text);
-            let updatedText =
-                `print (+ 1) 
-print 2
-print (+ 1)
-`
-            let edit = {
-                startIndex: 13,
-                oldEndIndex: 13,
-                newEndIndex: 20,
-                startPosition: { row: 1, column: 0 },
-                oldEndPosition: { row: 1, column: 0 },
-                newEndPosition: { row: 1, column: 7 }
-            }
-
-            let treeChildren = tree.children.slice();
-            let [newTree, changes] = flourishParser.parseIncremental(updatedText, edit);
-            assert.ok(tree === newTree)
-            assert.ok(treeChildren[0] === newTree.children[0])
-            assert.ok(treeChildren[1] !== newTree.children[1])
-            assert.ok(treeChildren[2] === newTree.children[2])
 
 
-        });
+
+
+//         it('Restore original tree after undoing', () => {
+//             let text =
+//                 `print [+ 1] 
+
+// print [+ 1]
+// `;
+//             let flourishParser = new Parser();
+//             let tree = flourishParser.parse(text);
+//             let treeString = JSON.stringify(tree);
+//             let updatedText =
+//                 `print [+ 1] 
+// print 2
+// print [+ 1]
+// `
+//             let edit = {
+//                 startIndex: 13,
+//                 oldEndIndex: 13,
+//                 newEndIndex: 20,
+//                 startPosition: { row: 1, column: 0 },
+//                 oldEndPosition: { row: 1, column: 0 },
+//                 newEndPosition: { row: 1, column: 7 }
+//             }
+
+//             let treeChildren = tree.children.slice();
+//             let [newTree, ] = flourishParser.parseIncremental(updatedText, edit);
+
+
+//             let reverseEdit = {
+//                 startIndex: 13,
+//                 oldEndIndex: 20,
+//                 newEndIndex: 13,
+//                 startPosition: { row: 1, column: 0 },
+//                 oldEndPosition: { row: 1, column: 7 },
+//                 newEndPosition: { row: 1, column: 0 }
+//             }
+
+//             let [newTree2, ] = flourishParser.parseIncremental(text, reverseEdit);
+
+//             let treeString2 = JSON.stringify(newTree2);
+//             assert.equal(treeString2,treeString);
+//         });
+
+//         it('Should retain treeNode after edit', () => {
+//             let text =
+//                 `print (+ 1) 
+
+// print (+ 1)
+// `;
+//             let flourishParser = new Parser();
+//             let tree = flourishParser.parse(text);
+//             let updatedText =
+//                 `print (+ 1) 
+// print 2
+// print (+ 1)
+// `
+//             let edit = {
+//                 startIndex: 13,
+//                 oldEndIndex: 13,
+//                 newEndIndex: 20,
+//                 startPosition: { row: 1, column: 0 },
+//                 oldEndPosition: { row: 1, column: 0 },
+//                 newEndPosition: { row: 1, column: 7 }
+//             }
+
+//             let treeChildren = tree.children.slice();
+//             let [newTree, changes] = flourishParser.parseIncremental(updatedText, edit);
+//             assert.ok(tree === newTree)
+//             assert.ok(treeChildren[0] === newTree.children[0])
+//             assert.ok(treeChildren[1] !== newTree.children[1])
+//             assert.ok(treeChildren[2] === newTree.children[2])
+
+
+//         });
 
 
 
