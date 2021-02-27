@@ -42,11 +42,15 @@ class FlourishParser {
         this.leastCommonAncesestor.rebuild();
 
         let mutatedChildren = FNode.accumulateMutatedLeaf(this.fNodeTree);
-        let mutatedRoot = this._leastCommonAncesestorArray(mutatedChildren);
+        let mutatedRoot =null
+        if (mutatedChildren.length) {
+            mutatedRoot = this._leastCommonAncesestorArray(mutatedChildren);
+
+        }
 
 
         
-        const changes = { changedRange, editedRange,mutatedRoot };
+        const changes = { changedRange, editedRange,mutatedRoot ,leastCommonAncesestor:this.leastCommonAncesestor};
         this.tsTree = newTree;
         return [this.fNodeTree, changes];
 

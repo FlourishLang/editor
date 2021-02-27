@@ -7,25 +7,44 @@ class Executer {
 
     constructor(intree) {
         this.tree = intree;
-        this.desiredActiveBlock  = null; //Block where execution cycle supposed to run
+        this.desiredActiveBlock = null; //Block where execution cycle supposed to run
+        this.activeBlock = null;
         this.reset();
     }
 
 
-    execute(state) {
+    execute(changes) {
+
+        if (changes) {
+            let mutatedRoot = changes.mutatedRoot;
+            while (mutatedRoot.getParent() && mutatedRoot.type != "block") {
+                mutatedRoot = mutatedRoot.getParent();
+            }
+            changes.mutatedRoot = mutatedRoot;
+            if (this.activeBlock) {
+
+                this.mutatedBlock = changes.leastCommonAncesestor(changes.mutatedRoot, this.activeBlock)
+            }
+
+        }
+
 
         do {
-            let result = this.executor.next(state);
+            let result = this.executor.next(Object.assign({}, changes, { mutatedBlock: this.mutatedBlock }));
 
             if (result.done == true) {
                 this.reset();
             }
 
-            if(result.value === "isDesiredActiveBlock")
+            if (result.value === "isDesiredActiveBlock")
                 return null;
 
-            if (result.value === "External mutation" ) //Todo redesign
+            if (result.value === "External mutation") //Todo redesign
                 continue;
+
+            if (result.value && result.value.activeBlock) {
+                this.activeBlock = result.value.activeBlock;
+            }
 
             return result.value;
         } while (true);
@@ -41,11 +60,10 @@ class Executer {
 
 
 
-    _iterativeSearch(tree, linenum) 
-    { 
+    _iterativeSearch(tree, linenum) {
         function adjustedEndPosition(end) {
-            if (end.column == 0 && end.row>0) {
-                return {row:end.row-1,column:end.column};
+            if (end.column == 0 && end.row > 0) {
+                return { row: end.row - 1, column: end.column };
             }
             return end;
         }
@@ -53,22 +71,22 @@ class Executer {
         let cursor = tree;
         // Traverse untill root reaches to dead end 
         let lastBlock = null;
-        
-       
-        while (cursor != null) { 
-            if(cursor.type == "block")
+
+
+        while (cursor != null) {
+            if (cursor.type == "block")
                 lastBlock = cursor;
 
-            let result  = bs(cursor.children,linenum,(element,needle)=>{
+            let result = bs(cursor.children, linenum, (element, needle) => {
 
                 if (adjustedEndPosition(element.endPosition).row < needle) {
                     return -1;
                 } else if (element.startPosition.row > needle) {
                     return 1;
-                } else if(element.startPosition.row <= needle
-                    && adjustedEndPosition(element.endPosition).row >= needle){
+                } else if (element.startPosition.row <= needle
+                    && adjustedEndPosition(element.endPosition).row >= needle) {
 
-                       return 0; 
+                    return 0;
                 }
                 throw "should not come here"
 
@@ -77,28 +95,28 @@ class Executer {
             let resultnode = cursor.children[result];
             if (resultnode) {
                 cursor = resultnode;
-            }else{
+            } else {
                 cursor = null;
             }
-            
-        } 
-        
-        return lastBlock; 
-     
-    
+
+        }
+
+        return lastBlock;
+
+
     }
 
-    setActiveLine(linenumber){
-        // return;
+    setActiveLine(linenumber) {
+        return;
 
-        let expectedActiveBlock = this._iterativeSearch(this.tree,linenumber);
-        if (expectedActiveBlock!=this.desiredActiveBlock) {//User want to run this block
-            if(this.desiredActiveBlock)
+        let expectedActiveBlock = this._iterativeSearch(this.tree, linenumber);
+        if (expectedActiveBlock != this.desiredActiveBlock) {//User want to run this block
+            if (this.desiredActiveBlock)
                 this.desiredActiveBlock.isDesiredActiveBlock = false;
 
-            this.desiredActiveBlock = null;            
+            this.desiredActiveBlock = null;
             this.desiredActiveBlock = expectedActiveBlock;
-            if(this.desiredActiveBlock)
+            if (this.desiredActiveBlock)
                 this.desiredActiveBlock.isDesiredActiveBlock = true;
 
         }
@@ -168,7 +186,7 @@ let statementBlockExecutor = function* statementBlockExecutor(body, environment,
                             break;
                     }
 
-                }else if (mayBeStatement.type != "emptylines") {
+                } else if (mayBeStatement.type != "emptylines") {
                     throw patchError(mayBeStatement, "statementError");
                 }
 
@@ -177,19 +195,21 @@ let statementBlockExecutor = function* statementBlockExecutor(body, environment,
         } catch (error) {
             gotAnError = true;
             console.log(error);
+            if (error instanceof ERROR)
+                error.activeBlock = body;
 
-            yield error;
+            let result = yield error;
 
-            if (body.isMutated == false)
+            if (result && result.mutatedBlock && result.mutatedBlock != body)
                 throw "External mutation";
 
 
         }
 
-        if(body.isDesiredActiveBlock && !gotAnError)
+        if (body.isDesiredActiveBlock && !gotAnError)
             yield "isDesiredActiveBlock"
 
-    } while (gotAnError||body.isDesiredActiveBlock);
+    } while (gotAnError || body.isDesiredActiveBlock);
 
 
 }

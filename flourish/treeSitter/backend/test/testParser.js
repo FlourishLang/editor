@@ -79,7 +79,6 @@ print [+ 1]
             let treeString2 = JSON.stringify(newTree2);
             assert.strictEqual(treeString2,treeString);
             // assert.strictEqual(changes.mutatedRoot,newTree2);
-            debugger;
         });
 
 

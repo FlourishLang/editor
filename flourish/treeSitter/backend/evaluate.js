@@ -166,7 +166,6 @@ function* evaluate(ast, env) {
 
 
         default:
-            debugger;
             throw ("Cannot evaluate:" + ast.type);
             break;
     }
